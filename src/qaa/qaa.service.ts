@@ -36,13 +36,35 @@ export class QaaService {
     return result.rows;
   }
 
-  async getLatestQaas(): Promise<QaaDto[]> {
+  async getLatestQaas(type?: string, showRemoved?: string): Promise<QaaDto[]> {
+    let whereCount = 1;
+    const whereParam = [];
+    let where = '';
+
+    if (showRemoved && showRemoved.toLowerCase() === 'true') {
+      where += `WHERE qaas.deleted_at IS NOT NULL`;
+    } else if (showRemoved && showRemoved.toLowerCase() === 'false') {
+      where += `WHERE qaas.deleted_at IS NULL`;
+    }
+
+    if (type) {
+      where +=
+        where.length > 0
+          ? ` and qaas.type = $${whereCount}`
+          : `WHERE qaas.type = $${whereCount}`;
+      whereParam.push(type);
+
+      whereCount++;
+    }
+
     const result = await this.database.query(
       `SELECT * FROM qaas 
-        WHERE qaas.deleted_at IS NULL
+        ${where}
         ORDER by qaas.created_at ASC
       `,
+      [...whereParam],
     );
+
     return result.rows;
   }
 

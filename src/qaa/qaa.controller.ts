@@ -7,12 +7,14 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  ParseBoolPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { QaaService } from './qaa.service';
 import { QaaDto } from 'src/dto/qaa.dto'; // Adjust the import based on your actual file structure
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Qaa')
 @Controller('qaa')
@@ -26,8 +28,13 @@ export class QaaController {
   }
 
   @Get('latest')
-  async getLatestQaas() {
-    const qaaList = await this.qaaService.getLatestQaas();
+  @ApiQuery({ name: 'type', required: false })
+  @ApiQuery({ name: 'showRemoved', required: false })
+  async getLatestQaas(
+    @Query('type') type?: string,
+    @Query('showRemoved') showRemoved?: string,
+  ) {
+    const qaaList = await this.qaaService.getLatestQaas(type, showRemoved);
     return qaaList;
   }
 
