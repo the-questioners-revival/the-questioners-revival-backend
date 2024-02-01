@@ -35,24 +35,43 @@ export class TodoService {
     return result.rows;
   }
 
-  async getLatestTodos(): Promise<TodoDto[]> {
+  async getLatestTodos(type?: string, status?: string): Promise<TodoDto[]> {
+    let whereCount = 2;
+    const whereParam = [];
+
+    let where = '';
+    if (type) {
+      where += ` and todos.type = $${whereCount}`;
+      whereParam.push(type);
+
+      whereCount++;
+    }
+    if (status) {
+      where += ` and todos.status = $${whereCount}`;
+      whereParam.push(status);
+
+      whereCount++;
+    }
+
     const result = await this.database.query(
       `SELECT * FROM todos 
         WHERE todos.status != $1
+        ${where}
         ORDER by todos.created_at ASC
       `,
-      [TODO_STATUS.REMOVED],
+      [TODO_STATUS.REMOVED, ...whereParam],
     );
     return result.rows;
   }
 
   async getAllTodosGroupedByDate(): Promise<TodoDto[]> {
     const result = await this.database.query(`
-        SELECT DATE(created_at) AS date,
+        SELECT DATE(completed_at) AS date,
         JSON_AGG(json_build_object('id', id, 'title', title, 'type', type, 
         'status', status, 'created_at', created_at, 'updated_at', updated_at, 
         'completed_at', completed_at, 'deleted_at', deleted_at)) AS todos
         FROM todos
+        WHERE todos.completed_at IS NOT NULL
         GROUP BY date
         ORDER BY date DESC;
       `);

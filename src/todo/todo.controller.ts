@@ -9,10 +9,11 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { TodoDto } from 'src/dto/todo.dto';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Todo')
 @Controller('todo')
@@ -26,8 +27,13 @@ export class TodoController {
   }
 
   @Get('latest')
-  async getLatestTodos() {
-    const todoList = await this.todoService.getLatestTodos();
+  @ApiQuery({ name: 'status', required: false })
+  @ApiQuery({ name: 'type', required: false })
+  async getLatestTodos(
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+  ) {
+    const todoList = await this.todoService.getLatestTodos(type, status);
     return todoList;
   }
 
@@ -121,7 +127,10 @@ export class TodoController {
         }
 
         // If there is no "next" property, save the comments to a file
-        fs.writeFileSync('./src/todo/allComments.json', JSON.stringify(comments, null, 2));
+        fs.writeFileSync(
+          './src/todo/allComments.json',
+          JSON.stringify(comments, null, 2),
+        );
         console.log('All comments saved successfully.');
         return comments;
       } catch (error) {
@@ -133,8 +142,7 @@ export class TodoController {
     // Replace 'YOUR_API_URL' with the actual API endpoint
     const apiUrl =
       'https://comment-cdn.9gag.com/v2/cacheable/comment-list.json?appId=a_dd8f2b7d304a10edaf6f29517ea0ca4100a43d1b&count=10000&';
-    const apiFirstUrl =
-      `https://comment-cdn.9gag.com/v2/cacheable/comment-list.json?appId=a_dd8f2b7d304a10edaf6f29517ea0ca4100a43d1b&count=10000&type=hot&viewMode=list&postKey=${postKey}&url=http%3A%2F%2F9gag.com%2Fgag%2F${postKey}&origin=https%3A%2F%2F9gag.com`;
+    const apiFirstUrl = `https://comment-cdn.9gag.com/v2/cacheable/comment-list.json?appId=a_dd8f2b7d304a10edaf6f29517ea0ca4100a43d1b&count=10000&type=hot&viewMode=list&postKey=${postKey}&url=http%3A%2F%2F9gag.com%2Fgag%2F${postKey}&origin=https%3A%2F%2F9gag.com`;
 
     // Start the process with the initial API URL
     getAllComments(apiUrl, apiFirstUrl);
