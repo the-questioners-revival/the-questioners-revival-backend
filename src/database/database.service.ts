@@ -1,20 +1,24 @@
 // database.service.ts
 
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Client, Pool } from 'pg';
 
 @Injectable()
 export class DatabaseService {
+  constructor(
+    private readonly configService: ConfigService,
+  ) {}
   private database: Pool;
 
   async getDatabase(): Promise<Client> {
     if (!this.database) {
       this.database = new Pool({
-        user: 'user',
-        host: 'localhost',
-        database: 'the-questioners',
-        password: 'g5fD23stTA9otiApg',
-        port: 5432,
+        user: this.configService.get('POSTGRESQL_USER'),
+        host: this.configService.get('POSTGRESQL_HOST'),
+        database: this.configService.get('POSTGRESQL_DB'),
+        password: this.configService.get('POSTGRESQL_PASSWORD'),
+        port: this.configService.get('POSTGRESQL_PORT'),
         max: 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,

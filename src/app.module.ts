@@ -6,9 +6,19 @@ import { UsersModule } from './users/users.module';
 import { TodoModule } from './todo/todo.module';
 import { QaaModule } from './qaa/qaa.module';
 import { BlogModule } from './blog/blog.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [MigrationsModule, UsersModule, TodoModule, QaaModule, BlogModule],
+  imports: [
+    MigrationsModule,
+    UsersModule,
+    TodoModule,
+    QaaModule,
+    BlogModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
