@@ -36,30 +36,32 @@ export class TodoService {
   }
 
   async getLatestTodos(type?: string, status?: string): Promise<TodoDto[]> {
-    let whereCount = 2;
+    let whereCount = 1;
     const whereParam = [];
-
     let where = '';
+
+    if (status) {
+      where += `where todos.status = $${whereCount}`;
+      whereParam.push(status);
+
+      whereCount++;
+    }
+ 
+
     if (type) {
       where += ` and todos.type = $${whereCount}`;
       whereParam.push(type);
 
       whereCount++;
     }
-    if (status) {
-      where += ` and todos.status = $${whereCount}`;
-      whereParam.push(status);
 
-      whereCount++;
-    }
 
     const result = await this.database.query(
       `SELECT * FROM todos 
-        WHERE todos.status != $1
         ${where}
         ORDER by todos.created_at ASC
       `,
-      [TODO_STATUS.REMOVED, ...whereParam],
+      [...whereParam],
     );
     return result.rows;
   }

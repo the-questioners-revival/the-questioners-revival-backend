@@ -72,7 +72,7 @@ export class QaaService {
     const result = await this.database.query(`
         SELECT DATE(created_at) AS date,
         JSON_AGG(json_build_object('id', id, 'question', question, 'answer', answer, 
-        'type', type, 'created_at', created_at, 'updated_at', updated_at, 
+        'type', type, 'link', link, 'created_at', created_at, 'updated_at', updated_at, 
         'deleted_at', deleted_at)) AS qaas
         FROM qaas
         GROUP BY date
@@ -84,8 +84,8 @@ export class QaaService {
   async insertQaa(qaa: QaaDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO qaas(question, answer, type) VALUES($1, $2, $3) RETURNING *',
-        [qaa.question, qaa.answer, qaa.type],
+        'INSERT INTO qaas(question, answer, type, link) VALUES($1, $2, $3, $4) RETURNING *',
+        [qaa.question, qaa.answer, qaa.type, qaa.link],
       );
 
       console.log('Qaa inserted successfully:', result.rows[0]);
@@ -103,8 +103,14 @@ export class QaaService {
     console.log('updatedQaa: ', updatedQaa);
     try {
       const result = await this.database.query(
-        'UPDATE qaas SET question = $1, answer = $2, type = $3 WHERE id = $4 RETURNING *',
-        [updatedQaa.question, updatedQaa.answer, updatedQaa.type, id],
+        'UPDATE qaas SET question = $1, answer = $2, type = $3, link = $4 WHERE id = $4 RETURNING *',
+        [
+          updatedQaa.question,
+          updatedQaa.answer,
+          updatedQaa.type,
+          updatedQaa.link,
+          id,
+        ],
       );
 
       if (result.rows.length > 0) {
