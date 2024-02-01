@@ -22,6 +22,7 @@ export class DatabaseService {
         max: 20,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,
+        ssl: this.configService.get('NODE_ENV') ==='prod' ? true: false,
       });
 
       console.log('Connected to PostgreSQL database');
