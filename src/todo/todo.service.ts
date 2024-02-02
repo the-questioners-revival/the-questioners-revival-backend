@@ -59,7 +59,7 @@ export class TodoService {
     const result = await this.database.query(
       `SELECT * FROM todos 
         ${where}
-        ORDER by todos.created_at ASC
+        ORDER by todos.created_at DESC
       `,
       [...whereParam],
     );

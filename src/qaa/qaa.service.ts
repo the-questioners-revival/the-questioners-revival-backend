@@ -60,7 +60,7 @@ export class QaaService {
     const result = await this.database.query(
       `SELECT * FROM qaas 
         ${where}
-        ORDER by qaas.created_at ASC
+        ORDER by qaas.created_at DESC
       `,
       [...whereParam],
     );
