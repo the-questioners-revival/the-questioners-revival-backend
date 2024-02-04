@@ -70,14 +70,14 @@ export class QaaService {
 
   async getAllQaasGroupedByDate(): Promise<QaaDto[]> {
     const result = await this.database.query(`
-        SELECT DATE(created_at) AS date,
-        JSON_AGG(json_build_object('id', id, 'question', question, 'answer', answer, 
-        'type', type, 'link', link, 'created_at', created_at, 'updated_at', updated_at, 
-        'deleted_at', deleted_at)) AS qaas
-        FROM qaas
-        GROUP BY date
-        ORDER BY date DESC;
-      `);
+    SELECT DATE(created_at) AS date,
+    JSON_AGG(json_build_object('id', id, 'question', question, 'answer', answer, 
+    'type', type, 'link', link, 'created_at', created_at, 'updated_at', updated_at, 
+    'deleted_at', deleted_at)) AS qaas
+    FROM qaas
+    GROUP BY date
+    ORDER BY date DESC;
+    `);
     return result.rows;
   }
 

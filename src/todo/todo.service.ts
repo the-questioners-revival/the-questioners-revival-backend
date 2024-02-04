@@ -46,7 +46,6 @@ export class TodoService {
 
       whereCount++;
     }
- 
 
     if (type) {
       where += ` and todos.type = $${whereCount}`;
@@ -55,11 +54,10 @@ export class TodoService {
       whereCount++;
     }
 
-
     const result = await this.database.query(
       `SELECT * FROM todos 
-        ${where}
-        ORDER by todos.created_at DESC
+      ${where}
+      ORDER by todos.created_at DESC
       `,
       [...whereParam],
     );

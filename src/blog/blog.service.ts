@@ -75,8 +75,14 @@ export class BlogService {
   async updateBlog(id: number, updatedBlog: BlogDto) {
     try {
       const result = await this.database.query(
-        'UPDATE blogs SET text = $1, given_at = $2, deleted_at = $3 WHERE id = $4 RETURNING *',
-        [updatedBlog.text, updatedBlog.given_at, updatedBlog.deleted_at, id],
+        'UPDATE blogs SET text = $1, given_at = $2, deleted_at = $3, updated_at = $4 WHERE id = $5 RETURNING *',
+        [
+          updatedBlog.text,
+          updatedBlog.given_at,
+          updatedBlog.deleted_at,
+          new Date().toISOString(),
+          id,
+        ],
       );
 
       if (result.rows.length > 0) {
