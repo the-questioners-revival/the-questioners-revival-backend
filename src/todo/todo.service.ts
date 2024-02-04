@@ -69,7 +69,7 @@ export class TodoService {
         SELECT DATE(completed_at) AS date,
         JSON_AGG(json_build_object('id', id, 'title', title, 'type', type, 
         'status', status, 'created_at', created_at, 'updated_at', updated_at, 
-        'completed_at', completed_at, 'deleted_at', deleted_at)) AS todos
+        'completed_at', completed_at, 'deleted_at', deleted_at) ORDER BY completed_at DESC) AS todos
         FROM todos
         WHERE todos.completed_at IS NOT NULL
         GROUP BY date

@@ -46,7 +46,7 @@ export class BlogService {
         SELECT DATE(given_at) AS date,
         JSON_AGG(json_build_object('id', id, 'text', text, 'given_at', given_at, 
         'created_at', created_at, 'updated_at', updated_at, 
-        'deleted_at', deleted_at)) AS blogs
+        'deleted_at', deleted_at) ORDER BY given_at DESC) AS blogs
         FROM blogs
         GROUP BY date
         ORDER BY date DESC;
