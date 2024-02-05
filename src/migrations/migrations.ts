@@ -83,4 +83,27 @@ export const migrations = [
       ADD COLUMN link VARCHAR(511);
     `,
   },
+  {
+    key: '20240204172637-CreateHabitsTable',
+    script: `
+      CREATE TABLE habits (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP
+      );
+    `,
+  },
+  {
+    key: '20240204174356-CreateHabitsTrackersTable',
+    script: `
+      CREATE TABLE habits_trackers (
+        id SERIAL PRIMARY KEY,
+        habit_id INTEGER REFERENCES habits(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `,
+  },
 ];
