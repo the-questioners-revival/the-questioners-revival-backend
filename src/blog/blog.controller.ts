@@ -72,6 +72,17 @@ export class BlogController {
     }
   }
 
+  @Post('remove/:id')
+  async removeBlog(@Param('id') id: number) {
+    try {
+      const blog = await this.blogService.removeBlog(id);
+      return { message: 'Blog removed successfully', blog };
+    } catch (error) {
+      // Handle errors
+      return { error: 'Failed to remove blog' };
+    }
+  }
+
   @Delete(':id')
   async deleteBlog(@Param('id') id: number) {
     try {

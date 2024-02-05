@@ -48,6 +48,7 @@ export class BlogService {
         'created_at', created_at, 'updated_at', updated_at, 
         'deleted_at', deleted_at) ORDER BY given_at DESC) AS blogs
         FROM blogs
+        WHERE deleted_at IS NULL
         GROUP BY date
         ORDER BY date DESC;
       `);
@@ -117,6 +118,29 @@ export class BlogService {
       console.error('Error deleting blog:', error);
       throw new HttpException(
         'Error deleting blog: ' + error,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async removeBlog(id: number) {
+    const now = new Date().toISOString();
+    try {
+      const result = await this.database.query(
+        'UPDATE blogs SET deleted_at = $1 WHERE id = $2 RETURNING *',
+        [now, id],
+      );
+
+      if (result.rows.length > 0) {
+        console.log('Blog status updated successfully:', result.rows[0]);
+        return result.rows[0];
+      } else {
+        throw new HttpException('Blog not found', HttpStatus.NOT_FOUND);
+      }
+    } catch (error) {
+      console.error('Error updating blog:', error);
+      throw new HttpException(
+        'Error updating blog: ' + error,
         HttpStatus.BAD_REQUEST,
       );
     }
