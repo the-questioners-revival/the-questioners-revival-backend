@@ -64,17 +64,21 @@ export class TodoService {
     return result.rows;
   }
 
-  async getAllTodosGroupedByDate(): Promise<TodoDto[]> {
-    const result = await this.database.query(`
+  async getAllTodosGroupedByDate(from, to): Promise<TodoDto[]> {
+    const result = await this.database.query(
+      `
         SELECT DATE(completed_at) AS date,
         JSON_AGG(json_build_object('id', id, 'title', title, 'type', type, 
         'status', status, 'created_at', created_at, 'updated_at', updated_at, 
         'completed_at', completed_at, 'deleted_at', deleted_at) ORDER BY completed_at DESC) AS todos
         FROM todos
         WHERE todos.completed_at IS NOT NULL
+        AND completed_at >= $1 AND completed_at <= $2
         GROUP BY date
         ORDER BY date DESC;
-      `);
+      `,
+      [from, to],
+    );
     return result.rows;
   }
 

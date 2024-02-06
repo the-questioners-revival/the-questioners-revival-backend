@@ -13,7 +13,13 @@ import {
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { TodoDto } from 'src/dto/todo.dto';
-import { ApiBody, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Todo')
 @Controller('todo')
@@ -38,8 +44,11 @@ export class TodoController {
   }
 
   @Get('groupedByDate')
-  async getTodosGroupedByDate() {
-    const todoList = await this.todoService.getAllTodosGroupedByDate();
+  async getTodosGroupedByDate(
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ) {
+    const todoList = await this.todoService.getAllTodosGroupedByDate(from, to);
     return todoList;
   }
 

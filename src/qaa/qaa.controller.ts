@@ -39,8 +39,11 @@ export class QaaController {
   }
 
   @Get('groupedByDate')
-  async getQaasGroupedByDate() {
-    const qaaList = await this.qaaService.getAllQaasGroupedByDate();
+  async getQaasGroupedByDate(
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ) {
+    const qaaList = await this.qaaService.getAllQaasGroupedByDate(from, to);
     return qaaList;
   }
 

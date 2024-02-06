@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { BlogDto } from 'src/dto/blog.dto'; // Assuming you have a BlogDto defined
@@ -32,8 +33,11 @@ export class BlogController {
   }
 
   @Get('groupedByDate')
-  async getBlogsGroupedByDate() {
-    const blogList = await this.blogService.getAllBlogsGroupedByDate();
+  async getBlogsGroupedByDate(
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ): Promise<BlogDto[]> {
+    const blogList = await this.blogService.getAllBlogsGroupedByDate(from, to);
     return blogList;
   }
 

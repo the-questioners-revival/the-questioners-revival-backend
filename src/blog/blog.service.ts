@@ -41,17 +41,21 @@ export class BlogService {
     return result.rows;
   }
 
-  async getAllBlogsGroupedByDate(): Promise<BlogDto[]> {
-    const result = await this.database.query(`
+  async getAllBlogsGroupedByDate(from, to): Promise<BlogDto[]> {
+    const result = await this.database.query(
+      `
         SELECT DATE(given_at) AS date,
         JSON_AGG(json_build_object('id', id, 'text', text, 'given_at', given_at, 
         'created_at', created_at, 'updated_at', updated_at, 
         'deleted_at', deleted_at) ORDER BY given_at DESC) AS blogs
         FROM blogs
         WHERE deleted_at IS NULL
+        AND created_at >= $1 AND created_at <= $2
         GROUP BY date
         ORDER BY date DESC;
-      `);
+      `,
+      [from, to],
+    );
     return result.rows;
   }
 
