@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+const setTZ = require('set-tz')
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Enable CORS if needed
   app.enableCors();
 
@@ -14,6 +15,8 @@ async function bootstrap() {
     .setDescription('Empty')
     .setVersion('1.0')
     .build();
+
+  setTZ('UTC');
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
