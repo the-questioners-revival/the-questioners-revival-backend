@@ -55,6 +55,16 @@ export class HabitsTrackerService {
     return result.rows;
   }
 
+  async getDailyHabitsTrackers(): Promise<HabitsTrackerDto[]> {
+    const result = await this.database.query(
+      `SELECT habits_trackers.id, habits.title, habits.type, habits_trackers.habit_id, habits_trackers.created_at FROM habits 
+      LEFT JOIN habits_trackers ON habits.id = habits_trackers.habit_id
+      WHERE habits.repeat = 'daily'`,
+      );
+      console.log('result: ', result);
+    return result.rows;
+  }
+
   async insertHabitsTracker(habits_tracker: HabitsTrackerDto) {
     try {
       const result = await this.database.query(

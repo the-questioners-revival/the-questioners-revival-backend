@@ -40,6 +40,13 @@ export class HabitsTrackerController {
     return habitsTrackerList;
   }
 
+  @Get('dailyHabitsTrackers')
+  async getDailyHabitsTrackers() {
+    const habitsTrackerList =
+      await this.habitsTrackerService.getDailyHabitsTrackers();
+    return habitsTrackerList;
+  }
+
   @Get('getById/:id')
   async getHabitsTrackerById(@Param('id') id: number) {
     try {

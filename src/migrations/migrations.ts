@@ -106,4 +106,11 @@ export const migrations = [
       );
     `,
   },
+  {
+    key: '20240206222709-AddRepeatToHabits',
+    script: `
+      ALTER TABLE habits
+      ADD COLUMN repeat VARCHAR(255);
+    `,
+  },
 ];

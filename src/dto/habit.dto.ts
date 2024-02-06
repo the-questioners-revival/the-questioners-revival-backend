@@ -11,6 +11,9 @@ export class HabitDto {
   type: string;
 
   @ApiProperty()
+  repeat: string;
+
+  @ApiProperty()
   created_at: Date;
 
   @ApiProperty()

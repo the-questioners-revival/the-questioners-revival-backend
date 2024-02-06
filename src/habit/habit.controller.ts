@@ -36,6 +36,12 @@ import {
       const habitList = await this.habitService.getAllHabitsGroupedByDate();
       return habitList;
     }
+
+    @Get('daily')
+    async getDailyHabits() {
+      const habitList = await this.habitService.getDailyHabits();
+      return habitList;
+    }
   
     @Get('getById/:id')
     async getHabitById(@Param('id') id: number) {
