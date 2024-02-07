@@ -41,6 +41,16 @@ export class HabitsTrackerService {
     return result.rows;
   }
 
+  async getHabitsTrackersFromTo(from, to): Promise<HabitsTrackerDto[]> {
+    const result = await this.database.query(
+      `SELECT * FROM habits_trackers 
+      WHERE created_at >= $1 AND created_at <= $2 
+      ORDER by habits_trackers.created_at ASC`,
+      [from, to],
+    );
+    return result.rows;
+  }
+
   async getAllHabitsTrackersGroupedByDate(): Promise<HabitsTrackerDto[]> {
     const result = await this.database.query(`
           SELECT DATE(given_at) AS date,
@@ -60,8 +70,8 @@ export class HabitsTrackerService {
       `SELECT habits_trackers.id, habits.title, habits.type, habits_trackers.habit_id, habits_trackers.created_at FROM habits 
       LEFT JOIN habits_trackers ON habits.id = habits_trackers.habit_id
       WHERE habits.repeat = 'daily'`,
-      );
-      console.log('result: ', result);
+    );
+    console.log('result: ', result);
     return result.rows;
   }
 

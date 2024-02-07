@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { HabitsTrackerService } from './habits-tracker.service';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -30,6 +31,16 @@ export class HabitsTrackerController {
   async getLatestHabitsTracker() {
     const habitsTrackerList =
       await this.habitsTrackerService.getLatestHabitsTracker();
+    return habitsTrackerList;
+  }
+
+  @Get('fromTo')
+  async getHabitsTrackersFromTo(
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ) {
+    const habitsTrackerList =
+      await this.habitsTrackerService.getHabitsTrackersFromTo(from, to);
     return habitsTrackerList;
   }
 
