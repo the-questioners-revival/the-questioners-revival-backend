@@ -107,12 +107,14 @@ export class QaaService {
     console.log('updatedQaa: ', updatedQaa);
     try {
       const result = await this.database.query(
-        'UPDATE qaas SET question = $1, answer = $2, type = $3, link = $4 WHERE id = $5 RETURNING *',
+        'UPDATE qaas SET question = $1, answer = $2, type = $3, link = $4, deleted_at = $5, updated_at = $6  WHERE id = $7 RETURNING *',
         [
           updatedQaa.question,
           updatedQaa.answer,
           updatedQaa.type,
           updatedQaa.link,
+          updatedQaa.deleted_at,
+          new Date().toISOString(),
           id,
         ],
       );
