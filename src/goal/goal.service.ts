@@ -47,6 +47,7 @@ export class GoalService {
       `SELECT * FROM goals 
           WHERE type = $1
           AND given_at >= $2 AND given_at <= $3
+          AND deleted_at IS NULL
           ORDER by goals.created_at ASC`,
       [type, from, to],
     );

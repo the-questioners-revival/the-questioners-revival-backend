@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { HabitModule } from './habit/habit.module';
 import { HabitsTrackerModule } from './habits-tracker/habits-tracker.module';
 import { GoalModule } from './goal/goal.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { GoalModule } from './goal/goal.module';
     HabitModule,
     HabitsTrackerModule,
     GoalModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],

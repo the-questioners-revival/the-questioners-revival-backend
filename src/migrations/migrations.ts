@@ -134,4 +134,18 @@ export const migrations = [
       ADD COLUMN completed_at TIMESTAMP;
     `,
   },
+  {
+    key: '20240206230715-CreateReviewsTable',
+    script: `
+      CREATE TABLE reviews (
+        id SERIAL PRIMARY KEY,
+        text TEXT NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        given_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP
+      );
+    `,
+  },
 ];
