@@ -113,4 +113,25 @@ export const migrations = [
       ADD COLUMN repeat VARCHAR(255);
     `,
   },
+  {
+    key: '20240204183015-CreateGoalsTable',
+    script: `
+      CREATE TABLE goals (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        given_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP
+      );
+    `,
+  },
+  {
+    key: '20240206222709-AddCompletedAtToGoals',
+    script: `
+      ALTER TABLE goals
+      ADD COLUMN completed_at TIMESTAMP;
+    `,
+  },
 ];

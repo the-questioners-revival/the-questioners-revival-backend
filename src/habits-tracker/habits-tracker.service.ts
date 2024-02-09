@@ -71,7 +71,6 @@ export class HabitsTrackerService {
       LEFT JOIN habits_trackers ON habits.id = habits_trackers.habit_id
       WHERE habits.repeat = 'daily'`,
     );
-    console.log('result: ', result);
     return result.rows;
   }
 
