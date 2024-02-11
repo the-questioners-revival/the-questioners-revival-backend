@@ -11,6 +11,9 @@ export class TodoDto {
   type: string;
 
   @ApiProperty()
+  priority: string;
+
+  @ApiProperty()
   status: string;
 
   @ApiProperty()

@@ -35,7 +35,11 @@ export class TodoService {
     return result.rows;
   }
 
-  async getLatestTodos(type?: string, status?: string): Promise<TodoDto[]> {
+  async getLatestTodos(
+    type?: string,
+    status?: string,
+    priority?: string,
+  ): Promise<TodoDto[]> {
     let whereCount = 1;
     const whereParam = [];
     let where = '';
@@ -48,8 +52,19 @@ export class TodoService {
     }
 
     if (type) {
-      where += ` and todos.type = $${whereCount}`;
+      where += `${
+        where.length > 0 ? ' AND' : 'WHERE'
+      } todos.type = $${whereCount}`;
       whereParam.push(type);
+
+      whereCount++;
+    }
+
+    if (priority) {
+      where += `${
+        where.length > 0 ? ' AND' : 'WHERE'
+      } todos.priority = $${whereCount}`;
+      whereParam.push(priority);
 
       whereCount++;
     }
@@ -85,8 +100,8 @@ export class TodoService {
   async insertTodo(todo: TodoDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO todos(title, type, status) VALUES($1, $2, $3) RETURNING *',
-        [todo.title, todo.type, TODO_STATUS.IN_PROGRESS],
+        'INSERT INTO todos(title, type, priority, status) VALUES($1, $2, $3, $4) RETURNING *',
+        [todo.title, todo.type, todo.priority, TODO_STATUS.IN_PROGRESS],
       );
 
       console.log('Todo inserted successfully:', result.rows[0]);
@@ -103,10 +118,11 @@ export class TodoService {
   async updateTodo(id: number, updatedTodo: TodoDto) {
     try {
       const result = await this.database.query(
-        'UPDATE todos SET title = $1, type = $2, status = $3, completed_at = $4, deleted_at = $5, updated_at = $6 WHERE id = $7 RETURNING *',
+        'UPDATE todos SET title = $1, type = $2, priority = $3, status = $4, completed_at = $5, deleted_at = $6, updated_at = $7 WHERE id = $8 RETURNING *',
         [
           updatedTodo.title,
           updatedTodo.type,
+          updatedTodo.priority,
           updatedTodo.status,
           updatedTodo.completed_at,
           updatedTodo.deleted_at,

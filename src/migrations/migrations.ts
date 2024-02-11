@@ -148,4 +148,11 @@ export const migrations = [
       );
     `,
   },
+  {
+    key: '20240206223456-AddPriorityToTodos',
+    script: `
+      ALTER TABLE todos
+      ADD COLUMN priority VARCHAR(50);
+    `,
+  },
 ];

@@ -35,11 +35,13 @@ export class TodoController {
   @Get('latest')
   @ApiQuery({ name: 'status', required: false })
   @ApiQuery({ name: 'type', required: false })
+  @ApiQuery({ name: 'priority', required: false })
   async getLatestTodos(
     @Query('type') type?: string,
     @Query('status') status?: string,
+    @Query('priority') priority?: string,
   ) {
-    const todoList = await this.todoService.getLatestTodos(type, status);
+    const todoList = await this.todoService.getLatestTodos(type, status, priority);
     return todoList;
   }
 
