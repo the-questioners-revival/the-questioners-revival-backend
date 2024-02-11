@@ -9,17 +9,27 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
+  Request
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserDto } from 'src/dto/user.dto';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Users') 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get('/protected')
+  @UseGuards(JwtAuthGuard)
+  protectedRoute() {
+    return 'yes';
+  }
+
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   async getUserById(@Param('id') id: number) {
     try {
       const user = await this.usersService.getUserById(id);
@@ -33,21 +43,15 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getAllUsers() {
     const users = await this.usersService.getAllUsers();
     return users;
   }
 
-  @Post()
-  @ApiBody({ type: UserDto })
-  @ApiResponse({ status: 201, description: 'User created', type: UserDto })
-  async createUser(@Body() body: UserDto) {
-    const newUser = await this.usersService.insertUser(body);
-
-    return { message: 'User created successfully', user: newUser };
-  }
-
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async updateUser(@Param('id') id: number, @Body() updatedUser: UserDto) {
     try {
       const updated = await this.usersService.updateUser(id, updatedUser);
@@ -61,6 +65,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async deleteUser(@Param('id') id: number) {
     try {
       const deleted = await this.usersService.deleteUser(id);
@@ -72,4 +77,6 @@ export class UsersController {
       );
     }
   }
+
+
 }

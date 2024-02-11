@@ -11,6 +11,9 @@ import { HabitModule } from './habit/habit.module';
 import { HabitsTrackerModule } from './habits-tracker/habits-tracker.module';
 import { GoalModule } from './goal/goal.module';
 import { ReviewModule } from './review/review.module';
+import { AuthModule } from './auth/auth.module';
+import { AuthService } from './auth/auth.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -26,8 +29,11 @@ import { ReviewModule } from './review/review.module';
     HabitsTrackerModule,
     GoalModule,
     ReviewModule,
+    AuthModule,
+    JwtModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthService],
+  exports: [AuthService],
 })
 export class AppModule {}

@@ -1,10 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-const setTZ = require('set-tz')
+const setTZ = require('set-tz');
+import * as dotenv from 'dotenv';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
+  dotenv.config();
   const app = await NestFactory.create(AppModule);
+
+  app.use(cookieParser());
 
   // Enable CORS if needed
   app.enableCors();

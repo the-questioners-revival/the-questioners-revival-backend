@@ -10,10 +10,12 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { GoalService } from './goal.service';
 import { GoalDto } from 'src/dto/goal.dto'; // Assuming you have a GoalDto defined
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Goal')
 @Controller('goal')
@@ -21,24 +23,36 @@ export class GoalController {
   constructor(private readonly goalService: GoalService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getAllGoals() {
     const goals = await this.goalService.getAllGoals();
     return goals;
   }
 
   @Get('latest')
+  @UseGuards(JwtAuthGuard)
   async getLatestGoal() {
     const goalList = await this.goalService.getLatestGoal();
     return goalList;
   }
 
   @Get('fromTo')
-  async getGoalsFromTo(@Query('type') type: string, @Query('from') from: string, @Query('to') to: string) {
-    const habitsTrackerList = await this.goalService.getGoalsFromTo(type, from, to);
+  @UseGuards(JwtAuthGuard)
+  async getGoalsFromTo(
+    @Query('type') type: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ) {
+    const habitsTrackerList = await this.goalService.getGoalsFromTo(
+      type,
+      from,
+      to,
+    );
     return habitsTrackerList;
   }
 
   @Get('groupedByDate')
+  @UseGuards(JwtAuthGuard)
   async getGoalsGroupedByDate(
     @Query('from') from: string,
     @Query('to') to: string,
@@ -48,6 +62,7 @@ export class GoalController {
   }
 
   @Get('getById/:id')
+  @UseGuards(JwtAuthGuard)
   async getGoalById(@Param('id') id: number) {
     try {
       const goal = await this.goalService.getGoalById(id);
@@ -63,6 +78,7 @@ export class GoalController {
   @Post()
   @ApiBody({ type: GoalDto })
   @ApiResponse({ status: 201, description: 'Goal created', type: GoalDto })
+  @UseGuards(JwtAuthGuard)
   async createGoal(@Body() body: GoalDto) {
     const newGoal = await this.goalService.insertGoal(body);
 
@@ -70,6 +86,7 @@ export class GoalController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   async updateGoal(@Param('id') id: number, @Body() updatedGoal: GoalDto) {
     try {
       const updated = await this.goalService.updateGoal(id, updatedGoal);
@@ -83,6 +100,7 @@ export class GoalController {
   }
 
   @Post('remove/:id')
+  @UseGuards(JwtAuthGuard)
   async removeGoal(@Param('id') id: number) {
     try {
       const goal = await this.goalService.removeGoal(id);
@@ -94,6 +112,7 @@ export class GoalController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async deleteGoal(@Param('id') id: number) {
     try {
       const deleted = await this.goalService.deleteGoal(id);

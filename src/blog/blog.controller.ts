@@ -10,10 +10,12 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { BlogDto } from 'src/dto/blog.dto'; // Assuming you have a BlogDto defined
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Blog')
 @Controller('blog')
@@ -21,18 +23,21 @@ export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getAllBlogs() {
     const blogs = await this.blogService.getAllBlogs();
     return blogs;
   }
 
   @Get('latest')
+  @UseGuards(JwtAuthGuard)
   async getLatestBlog() {
     const blogList = await this.blogService.getLatestBlog();
     return blogList;
   }
 
   @Get('groupedByDate')
+  @UseGuards(JwtAuthGuard)
   async getBlogsGroupedByDate(
     @Query('from') from: string,
     @Query('to') to: string,
@@ -42,6 +47,7 @@ export class BlogController {
   }
 
   @Get('getById/:id')
+  @UseGuards(JwtAuthGuard)
   async getBlogById(@Param('id') id: number) {
     try {
       const blog = await this.blogService.getBlogById(id);
@@ -57,6 +63,7 @@ export class BlogController {
   @Post()
   @ApiBody({ type: BlogDto })
   @ApiResponse({ status: 201, description: 'Blog created', type: BlogDto })
+  @UseGuards(JwtAuthGuard)
   async createBlog(@Body() body: BlogDto) {
     const newBlog = await this.blogService.insertBlog(body);
 
@@ -64,6 +71,7 @@ export class BlogController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   async updateBlog(@Param('id') id: number, @Body() updatedBlog: BlogDto) {
     try {
       const updated = await this.blogService.updateBlog(id, updatedBlog);
@@ -77,6 +85,7 @@ export class BlogController {
   }
 
   @Post('remove/:id')
+  @UseGuards(JwtAuthGuard)
   async removeBlog(@Param('id') id: number) {
     try {
       const blog = await this.blogService.removeBlog(id);
@@ -88,6 +97,7 @@ export class BlogController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async deleteBlog(@Param('id') id: number) {
     try {
       const deleted = await this.blogService.deleteBlog(id);

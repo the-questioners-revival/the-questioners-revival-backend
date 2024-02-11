@@ -11,10 +11,12 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { QaaService } from './qaa.service';
 import { QaaDto } from 'src/dto/qaa.dto'; // Adjust the import based on your actual file structure
 import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Qaa')
 @Controller('qaa')
@@ -22,6 +24,7 @@ export class QaaController {
   constructor(private readonly qaaService: QaaService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getAllQaa() {
     const qaaList = await this.qaaService.getAllQaa();
     return qaaList;
@@ -30,6 +33,7 @@ export class QaaController {
   @Get('latest')
   @ApiQuery({ name: 'type', required: false })
   @ApiQuery({ name: 'showRemoved', required: false })
+  @UseGuards(JwtAuthGuard)
   async getLatestQaas(
     @Query('type') type?: string,
     @Query('showRemoved') showRemoved?: string,
@@ -39,6 +43,7 @@ export class QaaController {
   }
 
   @Get('groupedByDate')
+  @UseGuards(JwtAuthGuard)
   async getQaasGroupedByDate(
     @Query('from') from: string,
     @Query('to') to: string,
@@ -48,6 +53,7 @@ export class QaaController {
   }
 
   @Get('getById/:id')
+  @UseGuards(JwtAuthGuard)
   async getQaaById(@Param('id') id: number) {
     try {
       const qaa = await this.qaaService.getQaaById(id);
@@ -63,6 +69,7 @@ export class QaaController {
   @Post()
   @ApiBody({ type: QaaDto })
   @ApiResponse({ status: 201, description: 'Qaa created', type: QaaDto })
+  @UseGuards(JwtAuthGuard)
   async createQaa(@Body() body: QaaDto) {
     const newQaa = await this.qaaService.insertQaa(body);
 
@@ -70,6 +77,7 @@ export class QaaController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   async updateQaa(@Param('id') id: number, @Body() updatedQaa: QaaDto) {
     try {
       const updated = await this.qaaService.updateQaa(id, updatedQaa);
@@ -83,6 +91,7 @@ export class QaaController {
   }
 
   @Post('remove/:id')
+  @UseGuards(JwtAuthGuard)
   async removeQaa(@Param('id') id: number) {
     try {
       const qaa = await this.qaaService.removeQaa(id);
@@ -94,6 +103,7 @@ export class QaaController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async deleteQaa(@Param('id') id: number) {
     try {
       const deleted = await this.qaaService.deleteQaa(id);

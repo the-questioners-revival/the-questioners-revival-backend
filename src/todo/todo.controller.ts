@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { TodoDto } from 'src/dto/todo.dto';
@@ -20,6 +21,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Todo')
 @Controller('todo')
@@ -27,6 +29,7 @@ export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getAllTodos() {
     const todos = await this.todoService.getAllTodos();
     return todos;
@@ -36,16 +39,22 @@ export class TodoController {
   @ApiQuery({ name: 'status', required: false })
   @ApiQuery({ name: 'type', required: false })
   @ApiQuery({ name: 'priority', required: false })
+  @UseGuards(JwtAuthGuard)
   async getLatestTodos(
     @Query('type') type?: string,
     @Query('status') status?: string,
     @Query('priority') priority?: string,
   ) {
-    const todoList = await this.todoService.getLatestTodos(type, status, priority);
+    const todoList = await this.todoService.getLatestTodos(
+      type,
+      status,
+      priority,
+    );
     return todoList;
   }
 
   @Get('groupedByDate')
+  @UseGuards(JwtAuthGuard)
   async getTodosGroupedByDate(
     @Query('from') from: string,
     @Query('to') to: string,
@@ -55,6 +64,7 @@ export class TodoController {
   }
 
   @Get('9gag2')
+  @UseGuards(JwtAuthGuard)
   async get9GagCommentsPictures() {
     const axios = require('axios');
     const fs = require('fs');
@@ -112,6 +122,7 @@ export class TodoController {
   }
 
   @Post('9gag/:url')
+  @UseGuards(JwtAuthGuard)
   async get9GagComments(@Param('url') url: string) {
     const postKey = url.split('/').pop();
     const axios = require('axios');
@@ -160,6 +171,7 @@ export class TodoController {
   }
 
   @Get('getById/:id')
+  @UseGuards(JwtAuthGuard)
   async getTodoById(@Param('id') id: number) {
     try {
       const todo = await this.todoService.getTodoById(id);
@@ -175,6 +187,7 @@ export class TodoController {
   @Post()
   @ApiBody({ type: TodoDto })
   @ApiResponse({ status: 201, description: 'Todo created', type: TodoDto })
+  @UseGuards(JwtAuthGuard)
   async createTodo(@Body() body: TodoDto) {
     const newTodo = await this.todoService.insertTodo(body);
 
@@ -182,6 +195,7 @@ export class TodoController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   async updateTodo(@Param('id') id: number, @Body() updatedTodo: TodoDto) {
     try {
       const updated = await this.todoService.updateTodo(id, updatedTodo);
@@ -195,6 +209,7 @@ export class TodoController {
   }
 
   @Post('complete/:id')
+  @UseGuards(JwtAuthGuard)
   async completeTodo(@Param('id') id: number) {
     try {
       const todo = await this.todoService.completeTodo(id);
@@ -206,6 +221,7 @@ export class TodoController {
   }
 
   @Post('inprogress/:id')
+  @UseGuards(JwtAuthGuard)
   async inprogressTodo(@Param('id') id: number) {
     try {
       const todo = await this.todoService.inprogressTodo(id);
@@ -217,6 +233,7 @@ export class TodoController {
   }
 
   @Post('remove/:id')
+  @UseGuards(JwtAuthGuard)
   async removeTodo(@Param('id') id: number) {
     try {
       const todo = await this.todoService.removeTodo(id);
@@ -228,6 +245,7 @@ export class TodoController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async deleteTodo(@Param('id') id: number) {
     try {
       const deleted = await this.todoService.deleteTodo(id);
