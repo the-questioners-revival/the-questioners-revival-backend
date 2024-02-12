@@ -56,7 +56,7 @@ export class AuthController {
     }
     const token = await this.authService.generateToken(user);
     // Set cookie in the response
-    response.cookie('token', token, { httpOnly: true }); // Adjust options as needed
+    response.cookie('token', token, { httpOnly: false }); // Adjust options as needed
     return { token };
   }
 }
