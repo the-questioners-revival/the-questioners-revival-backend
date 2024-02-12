@@ -50,7 +50,7 @@ export class BlogService {
         'deleted_at', deleted_at) ORDER BY given_at DESC) AS blogs
         FROM blogs
         WHERE deleted_at IS NULL
-        AND created_at >= $1 AND created_at <= $2
+        AND given_at >= $1 AND given_at <= $2
         GROUP BY date
         ORDER BY date DESC;
       `,
