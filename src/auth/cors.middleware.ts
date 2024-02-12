@@ -8,6 +8,7 @@ export class CorsMiddleware implements NestMiddleware {
     const allowedOrigins = [
       'http://localhost:3000',
       'https://the-questioners-revival-frontend.vercel.app',
+      'https://the-questioners-revival-frontend.vercel.app/',
     ];
 
     const origin = req.headers.origin;
