@@ -10,14 +10,15 @@ import {
   Post,
   Put,
   UseGuards,
-  Request
+  Request,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserDto } from 'src/dto/user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@ApiTags('Users') 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -26,6 +27,19 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   protectedRoute() {
     return 'yes';
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async me(@Request() req, @Query('jwt') jwt: string) {
+    const userWithPerson = await this.usersService.getUserByUsername(
+      req.user.username,
+    );
+    if (!userWithPerson) {
+      throw new HttpException('Wrong token', HttpStatus.UNAUTHORIZED);
+    }
+
+    return { ...userWithPerson, token: req.cookies.token };
   }
 
   @Get(':id')
@@ -77,6 +91,4 @@ export class UsersController {
       );
     }
   }
-
-
 }

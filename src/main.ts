@@ -4,16 +4,19 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 const setTZ = require('set-tz');
 import * as dotenv from 'dotenv';
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create(AppModule);
 
+  app.use(helmet()).enableCors({
+    origin: ['http://localhost:3000', 'https://the-questioners-revival-frontend.vercel.app/'],
+    credentials: true,
+  })
+
   app.use(cookieParser());
-
-  // Enable CORS if needed
-  app.enableCors();
-
+  
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('The Questioners Revival API')

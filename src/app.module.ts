@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MigrationsModule } from './migrations/migrations.module';
@@ -14,6 +19,7 @@ import { ReviewModule } from './review/review.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
+import { CookieUserMiddleware } from './auth/cookie.middleware';
 
 @Module({
   imports: [
@@ -36,4 +42,14 @@ import { JwtModule } from '@nestjs/jwt';
   providers: [AppService, AuthService],
   exports: [AuthService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply the middleware to all routes except those related to authentication
+    consumer
+      .apply(CookieUserMiddleware)
+      .exclude(
+        { path: 'auth/login', method: RequestMethod.ALL }, // Exclude authentication routes
+      )
+      .forRoutes('*');
+  }
+}

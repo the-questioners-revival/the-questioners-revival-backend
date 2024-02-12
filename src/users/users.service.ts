@@ -37,7 +37,7 @@ export class UsersService implements OnModuleInit {
 
   async getUserByUsername(username: string): Promise<UserDto> {
     const result = await this.database.query(
-      'SELECT u.username, u.email FROM users u WHERE u.username = $1',
+      'SELECT u.id, u.username, u.email, u.password FROM users u WHERE u.username = $1',
       [username],
     );
 
