@@ -8,12 +8,12 @@ import {
   NotFoundException,
   Param,
   Post,
-  Put,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { HabitsTrackerService } from './habits-tracker.service';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { HabitsTrackerDto } from 'src/dto/habitsTracker.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
@@ -24,61 +24,70 @@ export class HabitsTrackerController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getAllHabitsTrackers() {
-    const habitsTrackers =
-      await this.habitsTrackerService.getAllHabitsTrackers();
+  @ApiBearerAuth()
+  async getAllHabitsTrackers(@Request() req) {
+    const habitsTrackers = await this.habitsTrackerService.getAllHabitsTrackers(
+      req.user.id,
+    );
     return habitsTrackers;
   }
 
   @Get('latest')
   @UseGuards(JwtAuthGuard)
-  async getLatestHabitsTracker() {
+  @ApiBearerAuth()
+  async getLatestHabitsTracker(@Request() req) {
     const habitsTrackerList =
-      await this.habitsTrackerService.getLatestHabitsTracker();
+      await this.habitsTrackerService.getLatestHabitsTracker(req.user.id);
     return habitsTrackerList;
   }
 
   @Get('fromTo')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getHabitsTrackersFromTo(
+    @Request() req,
     @Query('from') from: string,
     @Query('to') to: string,
   ) {
     const habitsTrackerList =
-      await this.habitsTrackerService.getHabitsTrackersFromTo(from, to);
+      await this.habitsTrackerService.getHabitsTrackersFromTo(
+        req.user.id,
+        from,
+        to,
+      );
     return habitsTrackerList;
   }
 
   @Get('groupedByDate')
   @UseGuards(JwtAuthGuard)
-  async getHabitsTrackersGroupedByDate() {
+  @ApiBearerAuth()
+  async getHabitsTrackersGroupedByDate(@Request() req) {
     const habitsTrackerList =
-      await this.habitsTrackerService.getAllHabitsTrackersGroupedByDate();
+      await this.habitsTrackerService.getAllHabitsTrackersGroupedByDate(
+        req.user.id,
+      );
     return habitsTrackerList;
   }
 
   @Get('dailyHabitsTrackers')
   @UseGuards(JwtAuthGuard)
-  async getDailyHabitsTrackers() {
+  @ApiBearerAuth()
+  async getDailyHabitsTrackers(@Request() req) {
     const habitsTrackerList =
-      await this.habitsTrackerService.getDailyHabitsTrackers();
+      await this.habitsTrackerService.getDailyHabitsTrackers(req.user.id);
     return habitsTrackerList;
   }
 
   @Get('getById/:id')
   @UseGuards(JwtAuthGuard)
-  async getHabitsTrackerById(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async getHabitsTrackerById(@Request() req, @Param('id') id: number) {
     try {
       const habitsTracker =
-        await this.habitsTrackerService.getHabitsTrackerById(id);
+        await this.habitsTrackerService.getHabitsTrackerById(req.user.id, id);
       return habitsTracker;
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new NotFoundException(
-        `Error fetching habitsTracker: ${error.message}`,
-      );
+      return { error: error.message };
     }
   }
 
@@ -90,10 +99,10 @@ export class HabitsTrackerController {
     type: HabitsTrackerDto,
   })
   @UseGuards(JwtAuthGuard)
-  async createHabitsTracker(@Body() body: HabitsTrackerDto) {
+  @ApiBearerAuth()
+  async createHabitsTracker(@Request() req, @Body() body: HabitsTrackerDto) {
     const newHabitsTracker =
-      await this.habitsTrackerService.insertHabitsTracker(body);
-
+      await this.habitsTrackerService.insertHabitsTracker(req.user.id, body);
     return {
       message: 'HabitsTracker created successfully',
       habitsTracker: newHabitsTracker,
@@ -102,18 +111,19 @@ export class HabitsTrackerController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deleteHabitsTracker(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async deleteHabitsTracker(@Request() req, @Param('id') id: number) {
     try {
-      const deleted = await this.habitsTrackerService.deleteHabitsTracker(id);
+      const deleted = await this.habitsTrackerService.deleteHabitsTracker(
+        req.user.id,
+        id,
+      );
       return {
         message: 'HabitsTracker deleted successfully',
         habitsTracker: deleted,
       };
     } catch (error) {
-      throw new HttpException(
-        'Error deleting habitsTracker: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 }

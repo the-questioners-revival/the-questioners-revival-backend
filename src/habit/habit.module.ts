@@ -7,5 +7,6 @@ import { JwtModule } from '@nestjs/jwt';
   controllers: [HabitController],
   providers: [HabitService],
   imports: [JwtModule],
+  exports: [HabitService],
 })
 export class HabitModule {}

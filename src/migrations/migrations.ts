@@ -177,4 +177,11 @@ export const migrations = [
       ADD COLUMN user_id INTEGER REFERENCES users(id);
     `,
   },
+  {
+    key: '20240206223740-AddUserIdToHabitsTrackers',
+    script: `
+      ALTER TABLE habits_trackers
+      ADD COLUMN user_id INTEGER REFERENCES users(id);
+    `,
+  },
 ];
