@@ -17,10 +17,12 @@ export class TodoService {
     this.database = await this.databaseService.getDatabase();
   }
 
-  async getTodoById(id: number): Promise<TodoDto> {
+  async getTodoById(userId: number, id: number): Promise<TodoDto> {
     const result = await this.database.query(
-      'SELECT * FROM todos WHERE id = $1',
-      [id],
+      `SELECT * FROM todos 
+        WHERE id = $1
+        AND user_id = $2`,
+      [id, userId],
     );
 
     if (result.rows.length > 0) {
@@ -30,12 +32,17 @@ export class TodoService {
     }
   }
 
-  async getAllTodos(): Promise<TodoDto[]> {
-    const result = await this.database.query('SELECT * FROM todos');
+  async getAllTodos(userId: number): Promise<TodoDto[]> {
+    const result = await this.database.query(
+      `SELECT * FROM todos
+        WHERE user_id = $1`,
+      [userId],
+    );
     return result.rows;
   }
 
   async getLatestTodos(
+    userId: number,
     type?: string,
     status?: string,
     priority?: string,
@@ -69,6 +76,15 @@ export class TodoService {
       whereCount++;
     }
 
+    if (userId) {
+      where += `${
+        where.length > 0 ? ' AND' : 'WHERE'
+      } todos.user_id = $${whereCount}`;
+      whereParam.push(userId);
+
+      whereCount++;
+    }
+
     const result = await this.database.query(
       `SELECT * FROM todos 
       ${where}
@@ -79,7 +95,7 @@ export class TodoService {
     return result.rows;
   }
 
-  async getAllTodosGroupedByDate(from, to): Promise<TodoDto[]> {
+  async getAllTodosGroupedByDate(userId, from, to): Promise<TodoDto[]> {
     const result = await this.database.query(
       `
         SELECT DATE(completed_at) AS date,
@@ -89,19 +105,20 @@ export class TodoService {
         FROM todos
         WHERE todos.completed_at IS NOT NULL
         AND completed_at >= $1 AND completed_at <= $2
+        AND user_id =$3
         GROUP BY date
         ORDER BY date DESC;
       `,
-      [from, to],
+      [from, to, userId],
     );
     return result.rows;
   }
 
-  async insertTodo(todo: TodoDto) {
+  async insertTodo(userId: number, todo: TodoDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO todos(title, type, priority, status) VALUES($1, $2, $3, $4) RETURNING *',
-        [todo.title, todo.type, todo.priority, TODO_STATUS.IN_PROGRESS],
+        'INSERT INTO todos(title, type, priority, status, user_id) VALUES($1, $2, $3, $4, $5) RETURNING *',
+        [todo.title, todo.type, todo.priority, TODO_STATUS.IN_PROGRESS, userId],
       );
 
       console.log('Todo inserted successfully:', result.rows[0]);
@@ -115,8 +132,13 @@ export class TodoService {
     }
   }
 
-  async updateTodo(id: number, updatedTodo: TodoDto) {
+  async updateTodo(userId: number, id: number, updatedTodo: TodoDto) {
     try {
+      const foundTodo = await this.getTodoById(userId, id);
+      if (!foundTodo) {
+        throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+      }
+
       const result = await this.database.query(
         'UPDATE todos SET title = $1, type = $2, priority = $3, status = $4, completed_at = $5, deleted_at = $6, updated_at = $7 WHERE id = $8 RETURNING *',
         [
@@ -146,11 +168,15 @@ export class TodoService {
     }
   }
 
-  async updateStatusTodo(id: number, status: TODO_STATUS) {
+  async updateStatusTodo(userId: number, id: number, status: TODO_STATUS) {
     const now = new Date().toISOString();
     const statusRemoved = status === TODO_STATUS.REMOVED;
     const statusCompleted = status === TODO_STATUS.COMPLETED;
     try {
+      const foundTodo = await this.getTodoById(userId, id);
+      if (!foundTodo) {
+        throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+      }
       const result = await this.database.query(
         'UPDATE todos SET status = $1, updated_at = $2, completed_at = $3, deleted_at = $4 WHERE id = $5 RETURNING *',
         [
@@ -177,9 +203,13 @@ export class TodoService {
     }
   }
 
-  async completeTodo(id: number) {
+  async completeTodo(userId: number, id: number) {
     const now = new Date().toISOString();
     try {
+      const foundTodo = await this.getTodoById(userId, id);
+      if (!foundTodo) {
+        throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+      }
       const result = await this.database.query(
         'UPDATE todos SET status = $1, updated_at = $2, completed_at = $3, deleted_at = $4 WHERE id = $5 RETURNING *',
         [TODO_STATUS.COMPLETED, now, now, null, id],
@@ -200,16 +230,20 @@ export class TodoService {
     }
   }
 
-  async inprogressTodo(id: number) {
-    return this.updateStatusTodo(id, TODO_STATUS.IN_PROGRESS);
+  async inprogressTodo(userId: number, id: number) {
+    return this.updateStatusTodo(userId, id, TODO_STATUS.IN_PROGRESS);
   }
 
-  async removeTodo(id: number) {
-    return this.updateStatusTodo(id, TODO_STATUS.REMOVED);
+  async removeTodo(userId: number, id: number) {
+    return this.updateStatusTodo(userId, id, TODO_STATUS.REMOVED);
   }
 
-  async deleteTodo(id: number) {
+  async deleteTodo(userId, id: number) {
     try {
+      const foundTodo = await this.getTodoById(userId, id);
+      if (!foundTodo) {
+        throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
+      }
       const result = await this.database.query(
         'DELETE FROM todos WHERE id = $1 RETURNING *',
         [id],

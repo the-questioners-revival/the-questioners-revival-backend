@@ -16,10 +16,10 @@ export class BlogService {
     this.database = await this.databaseService.getDatabase();
   }
 
-  async getBlogById(id: number): Promise<BlogDto> {
+  async getBlogById(userId: number, id: number): Promise<BlogDto> {
     const result = await this.database.query(
-      'SELECT * FROM blogs WHERE id = $1',
-      [id],
+      'SELECT * FROM blogs WHERE id = $1 AND user_id = $2',
+      [id, userId],
     );
 
     if (result.rows.length > 0) {
@@ -29,19 +29,23 @@ export class BlogService {
     }
   }
 
-  async getAllBlogs(): Promise<BlogDto[]> {
-    const result = await this.database.query('SELECT * FROM blogs');
-    return result.rows;
-  }
-
-  async getLatestBlog(): Promise<BlogDto[]> {
+  async getAllBlogs(userId: number): Promise<BlogDto[]> {
     const result = await this.database.query(
-      'SELECT * FROM blogs ORDER by blogs.created_at ASC',
+      'SELECT * FROM blogs WHERE user_id = $1',
+      [userId],
     );
     return result.rows;
   }
 
-  async getAllBlogsGroupedByDate(from, to): Promise<BlogDto[]> {
+  async getLatestBlog(userId: number): Promise<BlogDto[]> {
+    const result = await this.database.query(
+      'SELECT * FROM blogs WHERE user_id = $1 ORDER by blogs.created_at ASC',
+      [userId],
+    );
+    return result.rows;
+  }
+
+  async getAllBlogsGroupedByDate(userId: number, from, to): Promise<BlogDto[]> {
     const result = await this.database.query(
       `
         SELECT DATE(given_at) AS date,
@@ -49,21 +53,21 @@ export class BlogService {
         'created_at', created_at, 'updated_at', updated_at, 
         'deleted_at', deleted_at) ORDER BY given_at DESC) AS blogs
         FROM blogs
-        WHERE deleted_at IS NULL
-        AND given_at >= $1 AND given_at <= $2
+        WHERE user_id = $1 AND deleted_at IS NULL
+        AND given_at >= $2 AND given_at <= $3
         GROUP BY date
         ORDER BY date DESC;
       `,
-      [from, to],
+      [userId, from, to],
     );
     return result.rows;
   }
 
-  async insertBlog(blog: BlogDto) {
+  async insertBlog(userId: number, blog: BlogDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO blogs(text, given_at) VALUES($1, $2) RETURNING *',
-        [blog.text, blog.given_at],
+        'INSERT INTO blogs(text, given_at, user_id) VALUES($1, $2, $3) RETURNING *',
+        [blog.text, blog.given_at, userId],
       );
 
       console.log('Blog inserted successfully:', result.rows[0]);
@@ -77,16 +81,17 @@ export class BlogService {
     }
   }
 
-  async updateBlog(id: number, updatedBlog: BlogDto) {
+  async updateBlog(userId: number, id: number, updatedBlog: BlogDto) {
     try {
       const result = await this.database.query(
-        'UPDATE blogs SET text = $1, given_at = $2, deleted_at = $3, updated_at = $4 WHERE id = $5 RETURNING *',
+        'UPDATE blogs SET text = $1, given_at = $2, deleted_at = $3, updated_at = $4 WHERE id = $5 AND user_id = $6 RETURNING *',
         [
           updatedBlog.text,
           updatedBlog.given_at,
           updatedBlog.deleted_at,
           new Date().toISOString(),
           id,
+          userId,
         ],
       );
 
@@ -105,11 +110,11 @@ export class BlogService {
     }
   }
 
-  async deleteBlog(id: number) {
+  async deleteBlog(userId: number, id: number) {
     try {
       const result = await this.database.query(
-        'DELETE FROM blogs WHERE id = $1 RETURNING *',
-        [id],
+        'DELETE FROM blogs WHERE id = $1 AND user_id = $2 RETURNING *',
+        [id, userId],
       );
 
       if (result.rows.length > 0) {
@@ -127,12 +132,12 @@ export class BlogService {
     }
   }
 
-  async removeBlog(id: number) {
+  async removeBlog(userId: number, id: number) {
     const now = new Date().toISOString();
     try {
       const result = await this.database.query(
-        'UPDATE blogs SET deleted_at = $1 WHERE id = $2 RETURNING *',
-        [now, id],
+        'UPDATE blogs SET deleted_at = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+        [now, id, userId],
       );
 
       if (result.rows.length > 0) {

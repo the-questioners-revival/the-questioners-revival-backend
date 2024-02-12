@@ -155,4 +155,26 @@ export const migrations = [
       ADD COLUMN priority VARCHAR(50);
     `,
   },
+  {
+    key: '20240206223500-AddUserIdToTodos',
+    script: `
+      ALTER TABLE todos
+      ADD COLUMN user_id INTEGER REFERENCES users(id);
+    `,
+  },
+  {
+    key: '20240206223631-AddUserIdToQaasBlogsHabitsGoalsReviews',
+    script: `
+      ALTER TABLE qaas
+      ADD COLUMN user_id INTEGER REFERENCES users(id);
+      ALTER TABLE blogs
+      ADD COLUMN user_id INTEGER REFERENCES users(id);
+      ALTER TABLE habits
+      ADD COLUMN user_id INTEGER REFERENCES users(id);
+      ALTER TABLE goals
+      ADD COLUMN user_id INTEGER REFERENCES users(id);
+      ALTER TABLE reviews
+      ADD COLUMN user_id INTEGER REFERENCES users(id);
+    `,
+  },
 ];

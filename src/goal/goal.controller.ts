@@ -10,11 +10,12 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { GoalService } from './goal.service';
 import { GoalDto } from 'src/dto/goal.dto'; // Assuming you have a GoalDto defined
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Goal')
@@ -24,26 +25,31 @@ export class GoalController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getAllGoals() {
-    const goals = await this.goalService.getAllGoals();
+  @ApiBearerAuth()
+  async getAllGoals(@Req() req) {
+    const goals = await this.goalService.getAllGoals(req.user.id);
     return goals;
   }
 
   @Get('latest')
   @UseGuards(JwtAuthGuard)
-  async getLatestGoal() {
-    const goalList = await this.goalService.getLatestGoal();
+  @ApiBearerAuth()
+  async getLatestGoal(@Req() req) {
+    const goalList = await this.goalService.getLatestGoal(req.user.id);
     return goalList;
   }
 
   @Get('fromTo')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getGoalsFromTo(
+    @Req() req,
     @Query('type') type: string,
     @Query('from') from: string,
     @Query('to') to: string,
   ) {
     const habitsTrackerList = await this.goalService.getGoalsFromTo(
+      req.user.id,
       type,
       from,
       to,
@@ -53,19 +59,26 @@ export class GoalController {
 
   @Get('groupedByDate')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getGoalsGroupedByDate(
+    @Req() req,
     @Query('from') from: string,
     @Query('to') to: string,
   ): Promise<GoalDto[]> {
-    const goalList = await this.goalService.getAllGoalsGroupedByDate(from, to);
+    const goalList = await this.goalService.getAllGoalsGroupedByDate(
+      req.user.id,
+      from,
+      to,
+    );
     return goalList;
   }
 
   @Get('getById/:id')
   @UseGuards(JwtAuthGuard)
-  async getGoalById(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async getGoalById(@Req() req, @Param('id') id: number) {
     try {
-      const goal = await this.goalService.getGoalById(id);
+      const goal = await this.goalService.getGoalById(req.user.id, id);
       return goal;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -79,49 +92,55 @@ export class GoalController {
   @ApiBody({ type: GoalDto })
   @ApiResponse({ status: 201, description: 'Goal created', type: GoalDto })
   @UseGuards(JwtAuthGuard)
-  async createGoal(@Body() body: GoalDto) {
-    const newGoal = await this.goalService.insertGoal(body);
+  @ApiBearerAuth()
+  async createGoal(@Req() req, @Body() body: GoalDto) {
+    const newGoal = await this.goalService.insertGoal(req.user.id, body);
 
     return { message: 'Goal created successfully', goal: newGoal };
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  async updateGoal(@Param('id') id: number, @Body() updatedGoal: GoalDto) {
+  @ApiBearerAuth()
+  async updateGoal(
+    @Req() req,
+    @Param('id') id: number,
+    @Body() updatedGoal: GoalDto,
+  ) {
     try {
-      const updated = await this.goalService.updateGoal(id, updatedGoal);
+      const updated = await this.goalService.updateGoal(
+        req.user.id,
+        id,
+        updatedGoal,
+      );
       return { message: 'Goal updated successfully', goal: updated };
     } catch (error) {
-      throw new HttpException(
-        'Error updating goal: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 
   @Post('remove/:id')
   @UseGuards(JwtAuthGuard)
-  async removeGoal(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async removeGoal(@Req() req, @Param('id') id: number) {
     try {
-      const goal = await this.goalService.removeGoal(id);
+      const goal = await this.goalService.removeGoal(req.user.id, id);
       return { message: 'Goal removed successfully', goal };
     } catch (error) {
       // Handle errors
-      return { error: 'Failed to remove goal' };
+      return { error: error.message };
     }
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deleteGoal(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async deleteGoal(@Req() req, @Param('id') id: number) {
     try {
-      const deleted = await this.goalService.deleteGoal(id);
+      const deleted = await this.goalService.deleteGoal(req.user.id, id);
       return { message: 'Goal deleted successfully', goal: deleted };
     } catch (error) {
-      throw new HttpException(
-        'Error deleting goal: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 }

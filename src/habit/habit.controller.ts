@@ -9,11 +9,12 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { HabitService } from './habit.service';
 import { HabitDto } from 'src/dto/habit.dto'; // Assuming you have a HabitDto defined
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Habit')
@@ -23,37 +24,44 @@ export class HabitController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getAllHabits() {
-    const habits = await this.habitService.getAllHabits();
+  @ApiBearerAuth()
+  async getAllHabits(@Req() req) {
+    const habits = await this.habitService.getAllHabits(req.user.id);
     return habits;
   }
 
   @Get('latest')
   @UseGuards(JwtAuthGuard)
-  async getLatestHabit() {
-    const habitList = await this.habitService.getLatestHabit();
+  @ApiBearerAuth()
+  async getLatestHabit(@Req() req) {
+    const habitList = await this.habitService.getLatestHabit(req.user.id);
     return habitList;
   }
 
   @Get('groupedByDate')
   @UseGuards(JwtAuthGuard)
-  async getHabitsGroupedByDate() {
-    const habitList = await this.habitService.getAllHabitsGroupedByDate();
+  @ApiBearerAuth()
+  async getHabitsGroupedByDate(@Req() req) {
+    const habitList = await this.habitService.getAllHabitsGroupedByDate(
+      req.user.id,
+    );
     return habitList;
   }
 
   @Get('daily')
   @UseGuards(JwtAuthGuard)
-  async getDailyHabits() {
-    const habitList = await this.habitService.getDailyHabits();
+  @ApiBearerAuth()
+  async getDailyHabits(@Req() req) {
+    const habitList = await this.habitService.getDailyHabits(req.user.id);
     return habitList;
   }
 
   @Get('getById/:id')
   @UseGuards(JwtAuthGuard)
-  async getHabitById(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async getHabitById(@Req() req, @Param('id') id: number) {
     try {
-      const habit = await this.habitService.getHabitById(id);
+      const habit = await this.habitService.getHabitById(req.user.id, id);
       return habit;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -67,49 +75,55 @@ export class HabitController {
   @ApiBody({ type: HabitDto })
   @ApiResponse({ status: 201, description: 'Habit created', type: HabitDto })
   @UseGuards(JwtAuthGuard)
-  async createHabit(@Body() body: HabitDto) {
-    const newHabit = await this.habitService.insertHabit(body);
+  @ApiBearerAuth()
+  async createHabit(@Req() req, @Body() body: HabitDto) {
+    const newHabit = await this.habitService.insertHabit(req.user.id, body);
 
     return { message: 'Habit created successfully', habit: newHabit };
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  async updateHabit(@Param('id') id: number, @Body() updatedHabit: HabitDto) {
+  @ApiBearerAuth()
+  async updateHabit(
+    @Req() req,
+    @Param('id') id: number,
+    @Body() updatedHabit: HabitDto,
+  ) {
     try {
-      const updated = await this.habitService.updateHabit(id, updatedHabit);
+      const updated = await this.habitService.updateHabit(
+        req.user.id,
+        id,
+        updatedHabit,
+      );
       return { message: 'Habit updated successfully', habit: updated };
     } catch (error) {
-      throw new HttpException(
-        'Error updating habit: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 
   @Post('remove/:id')
   @UseGuards(JwtAuthGuard)
-  async removeHabit(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async removeHabit(@Req() req, @Param('id') id: number) {
     try {
-      const habit = await this.habitService.removeHabit(id);
+      const habit = await this.habitService.removeHabit(req.user.id, id);
       return { message: 'Habit removed successfully', habit };
     } catch (error) {
       // Handle errors
-      return { error: 'Failed to remove habit' };
+      return { error: error.message };
     }
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deleteHabit(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async deleteHabit(@Req() req, @Param('id') id: number) {
     try {
-      const deleted = await this.habitService.deleteHabit(id);
+      const deleted = await this.habitService.deleteHabit(req.user.id, id);
       return { message: 'Habit deleted successfully', habit: deleted };
     } catch (error) {
-      throw new HttpException(
-        'Error deleting habit: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 }

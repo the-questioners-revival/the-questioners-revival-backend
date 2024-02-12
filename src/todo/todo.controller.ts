@@ -11,10 +11,12 @@ import {
   Put,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { TodoDto } from 'src/dto/todo.dto';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiParam,
   ApiQuery,
@@ -30,8 +32,9 @@ export class TodoController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getAllTodos() {
-    const todos = await this.todoService.getAllTodos();
+  @ApiBearerAuth()
+  async getAllTodos(@Request() req) {
+    const todos = await this.todoService.getAllTodos(req.user.id);
     return todos;
   }
 
@@ -40,12 +43,15 @@ export class TodoController {
   @ApiQuery({ name: 'type', required: false })
   @ApiQuery({ name: 'priority', required: false })
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getLatestTodos(
+    @Request() req,
     @Query('type') type?: string,
     @Query('status') status?: string,
     @Query('priority') priority?: string,
   ) {
     const todoList = await this.todoService.getLatestTodos(
+      req.user.id,
       type,
       status,
       priority,
@@ -55,11 +61,17 @@ export class TodoController {
 
   @Get('groupedByDate')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getTodosGroupedByDate(
+    @Request() req,
     @Query('from') from: string,
     @Query('to') to: string,
   ) {
-    const todoList = await this.todoService.getAllTodosGroupedByDate(from, to);
+    const todoList = await this.todoService.getAllTodosGroupedByDate(
+      req.user.id,
+      from,
+      to,
+    );
     return todoList;
   }
 
@@ -172,9 +184,10 @@ export class TodoController {
 
   @Get('getById/:id')
   @UseGuards(JwtAuthGuard)
-  async getTodoById(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async getTodoById(@Request() req, @Param('id') id: number) {
     try {
-      const todo = await this.todoService.getTodoById(id);
+      const todo = await this.todoService.getTodoById(req.user.id, id);
       return todo;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -188,73 +201,81 @@ export class TodoController {
   @ApiBody({ type: TodoDto })
   @ApiResponse({ status: 201, description: 'Todo created', type: TodoDto })
   @UseGuards(JwtAuthGuard)
-  async createTodo(@Body() body: TodoDto) {
-    const newTodo = await this.todoService.insertTodo(body);
+  @ApiBearerAuth()
+  async createTodo(@Request() req, @Body() body: TodoDto) {
+    const newTodo = await this.todoService.insertTodo(req.user.id, body);
 
     return { message: 'Todo created successfully', todo: newTodo };
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  async updateTodo(@Param('id') id: number, @Body() updatedTodo: TodoDto) {
+  @ApiBearerAuth()
+  async updateTodo(
+    @Request() req,
+    @Param('id') id: number,
+    @Body() updatedTodo: TodoDto,
+  ) {
     try {
-      const updated = await this.todoService.updateTodo(id, updatedTodo);
+      const updated = await this.todoService.updateTodo(
+        req.user.id,
+        id,
+        updatedTodo,
+      );
       return { message: 'Todo updated successfully', todo: updated };
     } catch (error) {
-      throw new HttpException(
-        'Error updating todo: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 
   @Post('complete/:id')
   @UseGuards(JwtAuthGuard)
-  async completeTodo(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async completeTodo(@Request() req, @Param('id') id: number) {
     try {
-      const todo = await this.todoService.completeTodo(id);
+      const todo = await this.todoService.completeTodo(req.user.id, id);
       return { message: 'Todo completed successfully', todo };
     } catch (error) {
       // Handle errors
-      return { error: 'Failed to complete todo' };
+      return { error: error.message };
     }
   }
 
   @Post('inprogress/:id')
   @UseGuards(JwtAuthGuard)
-  async inprogressTodo(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async inprogressTodo(@Request() req, @Param('id') id: number) {
     try {
-      const todo = await this.todoService.inprogressTodo(id);
+      const todo = await this.todoService.inprogressTodo(req.user.id, id);
       return { message: 'Todo marked as in progress successfully', todo };
     } catch (error) {
       // Handle errors
-      return { error: 'Failed to mark todo as in progress' };
+      return { error: error.message };
     }
   }
 
   @Post('remove/:id')
   @UseGuards(JwtAuthGuard)
-  async removeTodo(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async removeTodo(@Request() req, @Param('id') id: number) {
     try {
-      const todo = await this.todoService.removeTodo(id);
+      const todo = await this.todoService.removeTodo(req.user.id, id);
       return { message: 'Todo removed successfully', todo };
     } catch (error) {
       // Handle errors
-      return { error: 'Failed to remove todo' };
+      return { error: error.message };
     }
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deleteTodo(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async deleteTodo(@Request() req, @Param('id') id: number) {
     try {
-      const deleted = await this.todoService.deleteTodo(id);
+      const deleted = await this.todoService.deleteTodo(req.user.id, id);
       return { message: 'Todo deleted successfully', todo: deleted };
     } catch (error) {
-      throw new HttpException(
-        'Error deleting todo: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 }

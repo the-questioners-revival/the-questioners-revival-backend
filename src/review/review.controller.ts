@@ -10,11 +10,12 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { ReviewDto } from 'src/dto/review.dto'; // Assuming you have a ReviewDto defined
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Review')
@@ -24,26 +25,31 @@ export class ReviewController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async getAllReviews() {
-    const reviews = await this.reviewService.getAllReviews();
+  @ApiBearerAuth()
+  async getAllReviews(@Req() req) {
+    const reviews = await this.reviewService.getAllReviews(req.user.id);
     return reviews;
   }
 
   @Get('latest')
   @UseGuards(JwtAuthGuard)
-  async getLatestReview() {
-    const reviewList = await this.reviewService.getLatestReview();
+  @ApiBearerAuth()
+  async getLatestReview(@Req() req) {
+    const reviewList = await this.reviewService.getLatestReview(req.user.id);
     return reviewList;
   }
 
   @Get('fromTo')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getReviewsFromTo(
+    @Req() req,
     @Query('type') type: string,
     @Query('from') from: string,
     @Query('to') to: string,
   ) {
     const habitsTrackerList = await this.reviewService.getReviewsFromTo(
+      req.user.id,
       type,
       from,
       to,
@@ -53,11 +59,14 @@ export class ReviewController {
 
   @Get('groupedByDate')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async getReviewsGroupedByDate(
+    @Req() req,
     @Query('from') from: string,
     @Query('to') to: string,
   ): Promise<ReviewDto[]> {
     const reviewList = await this.reviewService.getAllReviewsGroupedByDate(
+      req.user.id,
       from,
       to,
     );
@@ -66,9 +75,10 @@ export class ReviewController {
 
   @Get('getById/:id')
   @UseGuards(JwtAuthGuard)
-  async getReviewById(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async getReviewById(@Req() req, @Param('id') id: number) {
     try {
-      const review = await this.reviewService.getReviewById(id);
+      const review = await this.reviewService.getReviewById(req.user.id, id);
       return review;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -82,52 +92,55 @@ export class ReviewController {
   @ApiBody({ type: ReviewDto })
   @ApiResponse({ status: 201, description: 'Review created', type: ReviewDto })
   @UseGuards(JwtAuthGuard)
-  async createReview(@Body() body: ReviewDto) {
-    const newReview = await this.reviewService.insertReview(body);
+  @ApiBearerAuth()
+  async createReview(@Req() req, @Body() body: ReviewDto) {
+    const newReview = await this.reviewService.insertReview(req.user.id, body);
 
     return { message: 'Review created successfully', review: newReview };
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async updateReview(
+    @Req() req,
     @Param('id') id: number,
     @Body() updatedReview: ReviewDto,
   ) {
     try {
-      const updated = await this.reviewService.updateReview(id, updatedReview);
+      const updated = await this.reviewService.updateReview(
+        req.user.id,
+        id,
+        updatedReview,
+      );
       return { message: 'Review updated successfully', review: updated };
     } catch (error) {
-      throw new HttpException(
-        'Error updating review: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 
   @Post('remove/:id')
   @UseGuards(JwtAuthGuard)
-  async removeReview(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async removeReview(@Req() req, @Param('id') id: number) {
     try {
-      const review = await this.reviewService.removeReview(id);
+      const review = await this.reviewService.removeReview(req.user.id, id);
       return { message: 'Review removed successfully', review };
     } catch (error) {
       // Handle errors
-      return { error: 'Failed to remove review' };
+      return { error: error.message };
     }
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deleteReview(@Param('id') id: number) {
+  @ApiBearerAuth()
+  async deleteReview(@Req() req, @Param('id') id: number) {
     try {
-      const deleted = await this.reviewService.deleteReview(id);
+      const deleted = await this.reviewService.deleteReview(req.user.id, id);
       return { message: 'Review deleted successfully', review: deleted };
     } catch (error) {
-      throw new HttpException(
-        'Error deleting review: ' + error.message,
-        HttpStatus.BAD_REQUEST,
-      );
+      return { error: error.message };
     }
   }
 }

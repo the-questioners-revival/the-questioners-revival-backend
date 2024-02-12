@@ -45,7 +45,7 @@ export class CookieUserMiddleware implements NestMiddleware {
         const userId = decodedToken.sub;
 
         // Fetch user information from your database using the userId
-        const user = await this.usersService.getUserById(userId);
+        const user = await this.usersService.getUserById(userId, userId);
 
         // Attach user information to the request object
         req.user = user;

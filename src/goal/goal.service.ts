@@ -16,10 +16,11 @@ export class GoalService {
     this.database = await this.databaseService.getDatabase();
   }
 
-  async getGoalById(id: number): Promise<GoalDto> {
+  async getGoalById(userId: number, id: number): Promise<GoalDto> {
     const result = await this.database.query(
-      'SELECT * FROM goals WHERE id = $1',
-      [id],
+      `SELECT * FROM goals WHERE id = $1
+      AND user_id = $2`,
+      [id, userId],
     );
 
     if (result.rows.length > 0) {
@@ -29,32 +30,46 @@ export class GoalService {
     }
   }
 
-  async getAllGoals(): Promise<GoalDto[]> {
-    const result = await this.database.query('SELECT * FROM goals');
-    return result.rows;
-  }
-
-  async getLatestGoal(): Promise<GoalDto[]> {
+  async getAllGoals(userId: number): Promise<GoalDto[]> {
     const result = await this.database.query(
-      'SELECT * FROM goals ORDER by goals.created_at ASC',
+      'SELECT * FROM goals WHERE user_id = $1',
+      [userId],
     );
     return result.rows;
   }
 
-  async getGoalsFromTo(type, from, to): Promise<GoalDto[]> {
+  async getLatestGoal(userId: number): Promise<GoalDto[]> {
+    const result = await this.database.query(
+      'SELECT * FROM goals WHERE user_id = $1 ORDER by goals.created_at ASC',
+      [userId],
+    );
+    return result.rows;
+  }
+
+  async getGoalsFromTo(
+    userId: number,
+    type: string,
+    from: string,
+    to: string,
+  ): Promise<GoalDto[]> {
     console.log('type, from, to: ', type, from, to);
     const result = await this.database.query(
       `SELECT * FROM goals 
-          WHERE type = $1
-          AND given_at >= $2 AND given_at <= $3
+          WHERE user_id = $1
+          AND type = $2
+          AND given_at >= $3 AND given_at <= $4
           AND deleted_at IS NULL
           ORDER by goals.created_at ASC`,
-      [type, from, to],
+      [userId, type, from, to],
     );
     return result.rows;
   }
 
-  async getAllGoalsGroupedByDate(from, to): Promise<GoalDto[]> {
+  async getAllGoalsGroupedByDate(
+    userId: number,
+    from: string,
+    to: string,
+  ): Promise<GoalDto[]> {
     const result = await this.database.query(
       `
           SELECT DATE(given_at) AS date,
@@ -62,21 +77,22 @@ export class GoalService {
           'created_at', created_at, 'updated_at', updated_at, 
           'deleted_at', deleted_at) ORDER BY given_at DESC) AS goals
           FROM goals
-          WHERE deleted_at IS NULL
-          AND created_at >= $1 AND created_at <= $2
+          WHERE user_id = $1
+          AND deleted_at IS NULL
+          AND created_at >= $2 AND created_at <= $3
           GROUP BY date
           ORDER BY date DESC;
         `,
-      [from, to],
+      [userId, from, to],
     );
     return result.rows;
   }
 
-  async insertGoal(goal: GoalDto) {
+  async insertGoal(userId: number, goal: GoalDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO goals(title, type, given_at) VALUES($1, $2, $3) RETURNING *',
-        [goal.title, goal.type, goal.given_at],
+        'INSERT INTO goals(title, type, given_at, user_id) VALUES($1, $2, $3, $4) RETURNING *',
+        [goal.title, goal.type, goal.given_at, userId],
       );
 
       console.log('Goal inserted successfully:', result.rows[0]);
@@ -90,11 +106,11 @@ export class GoalService {
     }
   }
 
-  async updateGoal(id: number, updatedGoal: GoalDto) {
+  async updateGoal(userId: number, id: number, updatedGoal: GoalDto) {
     try {
       const result = await this.database.query(
         `UPDATE goals SET title = $1, type = $2, given_at = $3, completed_at = $4, deleted_at = $5, updated_at = $6 
-          WHERE id = $7 RETURNING *`,
+          WHERE id = $7 AND user_id = $8 RETURNING *`,
         [
           updatedGoal.title,
           updatedGoal.type,
@@ -103,6 +119,7 @@ export class GoalService {
           updatedGoal.deleted_at,
           new Date().toISOString(),
           id,
+          userId,
         ],
       );
 
@@ -121,11 +138,11 @@ export class GoalService {
     }
   }
 
-  async deleteGoal(id: number) {
+  async deleteGoal(userId: number, id: number) {
     try {
       const result = await this.database.query(
-        'DELETE FROM goals WHERE id = $1 RETURNING *',
-        [id],
+        'DELETE FROM goals WHERE id = $1 AND user_id = $2 RETURNING *',
+        [id, userId],
       );
 
       if (result.rows.length > 0) {
@@ -143,12 +160,12 @@ export class GoalService {
     }
   }
 
-  async removeGoal(id: number) {
+  async removeGoal(userId: number, id: number) {
     const now = new Date().toISOString();
     try {
       const result = await this.database.query(
-        'UPDATE goals SET deleted_at = $1 WHERE id = $2 RETURNING *',
-        [now, id],
+        'UPDATE goals SET deleted_at = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+        [now, id, userId],
       );
 
       if (result.rows.length > 0) {

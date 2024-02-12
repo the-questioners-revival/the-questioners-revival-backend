@@ -22,9 +22,13 @@ export class UsersService implements OnModuleInit {
     this.database = await this.databaseService.getDatabase();
   }
 
-  async getUserById(id: number): Promise<UserDto> {
+  async getUserById(userId: number, id: number): Promise<UserDto> {
+    if (userId.toString() !== id.toString()) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+    
     const result = await this.database.query(
-      'SELECT u.username, u.email FROM users u WHERE u.id = $1',
+      'SELECT u.id, u.username, u.email FROM users u WHERE u.id = $1',
       [id],
     );
 
@@ -48,11 +52,6 @@ export class UsersService implements OnModuleInit {
     }
   }
 
-  async getAllUsers(): Promise<UserDto[]> {
-    const result = await this.database.query('SELECT * FROM users');
-    return result.rows;
-  }
-
   async insertUser(registerData: RegisterDto) {
     try {
       const result = await this.database.query(
@@ -60,10 +59,10 @@ export class UsersService implements OnModuleInit {
         [registerData.username, registerData.email, registerData.password],
       );
 
-      console.log('User inserted successfully:', result.rows[0]);
+      
       return result[0];
     } catch (error) {
-      console.error('Error inserting user:', error);
+      
       throw new HttpException(
         'Error inserting user: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -71,22 +70,26 @@ export class UsersService implements OnModuleInit {
     }
   }
 
-  async updateUser(id: number, updatedUser: UserDto) {
-    console.log('updatedUser: ', updatedUser);
+  async updateUser(userId: number, id: number, updatedUser: UserDto) {
+    
     try {
+      const foundUser = await this.getUserById(userId, id);
+      if (!foundUser) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
       const result = await this.database.query(
         'UPDATE users SET username = $1, email = $2 WHERE id = $3 RETURNING *',
         [updatedUser.username, updatedUser.email, id],
       );
 
       if (result.rows.length > 0) {
-        console.log('User updated successfully:', result.rows[0]);
+        
         return result.rows[0];
       } else {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      console.error('Error updating user:', error);
+      
       throw new HttpException(
         'Error updating user: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -94,21 +97,25 @@ export class UsersService implements OnModuleInit {
     }
   }
 
-  async deleteUser(id: number) {
+  async deleteUser(userId: number, id: number) {
     try {
+      const foundUser = await this.getUserById(userId, id);
+      if (!foundUser) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
       const result = await this.database.query(
         'DELETE FROM users WHERE id = $1 RETURNING *',
         [id],
       );
 
       if (result.rows.length > 0) {
-        console.log('User deleted successfully:', result.rows[0]);
+        
         return result.rows[0];
       } else {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
+      
       throw new HttpException(
         'Error deleting user: ' + error,
         HttpStatus.BAD_REQUEST,

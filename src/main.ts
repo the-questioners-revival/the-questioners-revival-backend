@@ -24,6 +24,7 @@ async function bootstrap() {
     .setTitle('The Questioners Revival API')
     .setDescription('Empty')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   setTZ('UTC');

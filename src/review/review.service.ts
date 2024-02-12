@@ -16,7 +16,7 @@ export class ReviewService {
     this.database = await this.databaseService.getDatabase();
   }
 
-  async getReviewById(id: number): Promise<ReviewDto> {
+  async getReviewById(userId: number, id: number): Promise<ReviewDto> {
     const result = await this.database.query(
       'SELECT * FROM reviews WHERE id = $1',
       [id],
@@ -29,31 +29,33 @@ export class ReviewService {
     }
   }
 
-  async getAllReviews(): Promise<ReviewDto[]> {
-    const result = await this.database.query('SELECT * FROM reviews');
+  async getAllReviews(userId: number): Promise<ReviewDto[]> {
+    const result = await this.database.query('SELECT * FROM reviews WHERE user_id = $1', [userId]);
     return result.rows;
   }
 
-  async getLatestReview(): Promise<ReviewDto[]> {
+  async getLatestReview(userId: number): Promise<ReviewDto[]> {
     const result = await this.database.query(
-      'SELECT * FROM reviews ORDER by reviews.created_at ASC',
+      'SELECT * FROM reviews WHERE user_id = $1 ORDER by reviews.created_at ASC',
+      [userId],
     );
     return result.rows;
   }
 
-  async getReviewsFromTo(type, from, to): Promise<ReviewDto[]> {
+  async getReviewsFromTo(userId: number, type, from, to): Promise<ReviewDto[]> {
     const result = await this.database.query(
       `SELECT * FROM reviews 
-            WHERE type = $1
-            AND given_at >= $2 AND given_at <= $3
+            WHERE user_id = $1
+            AND type = $2
+            AND given_at >= $3 AND given_at <= $4
             AND deleted_at IS NULL
             ORDER by reviews.created_at ASC`,
-      [type, from, to],
+      [userId, type, from, to],
     );
     return result.rows;
   }
 
-  async getAllReviewsGroupedByDate(from, to): Promise<ReviewDto[]> {
+  async getAllReviewsGroupedByDate(userId: number, from, to): Promise<ReviewDto[]> {
     const result = await this.database.query(
       `
             SELECT DATE(given_at) AS date,
@@ -61,21 +63,22 @@ export class ReviewService {
             'created_at', created_at, 'updated_at', updated_at, 
             'deleted_at', deleted_at) ORDER BY given_at DESC) AS reviews
             FROM reviews
-            WHERE deleted_at IS NULL
-            AND created_at >= $1 AND created_at <= $2
+            WHERE user_id = $1
+            AND deleted_at IS NULL
+            AND created_at >= $2 AND created_at <= $3
             GROUP BY date
             ORDER BY date DESC;
           `,
-      [from, to],
+      [userId, from, to],
     );
     return result.rows;
   }
 
-  async insertReview(review: ReviewDto) {
+  async insertReview(userId: number, review: ReviewDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO reviews(text, type, given_at) VALUES($1, $2, $3) RETURNING *',
-        [review.text, review.type, review.given_at],
+        'INSERT INTO reviews(text, type, given_at, user_id) VALUES($1, $2, $3, $4) RETURNING *',
+        [review.text, review.type, review.given_at, userId],
       );
 
       console.log('Review inserted successfully:', result.rows[0]);
@@ -89,11 +92,11 @@ export class ReviewService {
     }
   }
 
-  async updateReview(id: number, updatedReview: ReviewDto) {
+  async updateReview(userId: number, id: number, updatedReview: ReviewDto) {
     try {
       const result = await this.database.query(
         `UPDATE reviews SET text = $1, type = $2, given_at = $3, deleted_at = $4, updated_at = $5
-            WHERE id = $6 RETURNING *`,
+            WHERE id = $6 AND user_id = $7 RETURNING *`,
         [
           updatedReview.text,
           updatedReview.type,
@@ -101,6 +104,7 @@ export class ReviewService {
           updatedReview.deleted_at,
           new Date().toISOString(),
           id,
+          userId,
         ],
       );
 
@@ -119,11 +123,11 @@ export class ReviewService {
     }
   }
 
-  async deleteReview(id: number) {
+  async deleteReview(userId: number, id: number) {
     try {
       const result = await this.database.query(
-        'DELETE FROM reviews WHERE id = $1 RETURNING *',
-        [id],
+        'DELETE FROM reviews WHERE id = $1 AND user_id = $2 RETURNING *',
+        [id, userId],
       );
 
       if (result.rows.length > 0) {
@@ -141,12 +145,12 @@ export class ReviewService {
     }
   }
 
-  async removeReview(id: number) {
+  async removeReview(userId: number, id: number) {
     const now = new Date().toISOString();
     try {
       const result = await this.database.query(
-        'UPDATE reviews SET deleted_at = $1 WHERE id = $2 RETURNING *',
-        [now, id],
+        'UPDATE reviews SET deleted_at = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+        [now, id, userId],
       );
 
       if (result.rows.length > 0) {

@@ -53,6 +53,8 @@ export class AppModule implements NestModule {
       .apply(CookieUserMiddleware)
       .exclude(
         { path: 'auth/login', method: RequestMethod.ALL }, // Exclude authentication routes
+        { path: 'auth/register', method: RequestMethod.ALL }, // Exclude authentication routes
+        { path: '', method: RequestMethod.ALL }, // Exclude authentication routes
       )
       .forRoutes('*');
   }

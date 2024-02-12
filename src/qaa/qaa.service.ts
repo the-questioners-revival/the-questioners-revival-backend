@@ -18,10 +18,12 @@ export class QaaService {
     this.database = await this.databaseService.getDatabase();
   }
 
-  async getQaaById(id: number): Promise<QaaDto> {
+  async getQaaById(userId: number, id: number): Promise<QaaDto> {
     const result = await this.database.query(
-      'SELECT * FROM qaas WHERE id = $1',
-      [id],
+      `SELECT * FROM qaas 
+        WHERE id = $1
+        AND user_id = $2`,
+      [id, userId],
     );
 
     if (result.rows.length > 0) {
@@ -31,12 +33,20 @@ export class QaaService {
     }
   }
 
-  async getAllQaa(): Promise<QaaDto[]> {
-    const result = await this.database.query('SELECT * FROM qaas');
+  async getAllQaa(userId: number): Promise<QaaDto[]> {
+    const result = await this.database.query(
+      `SELECT * FROM qaas
+        WHERE user_id = $1`,
+      [userId],
+    );
     return result.rows;
   }
 
-  async getLatestQaas(type?: string, showRemoved?: string): Promise<QaaDto[]> {
+  async getLatestQaas(
+    userId: number,
+    type?: string,
+    showRemoved?: string,
+  ): Promise<QaaDto[]> {
     let whereCount = 1;
     const whereParam = [];
     let where = '';
@@ -57,6 +67,15 @@ export class QaaService {
       whereCount++;
     }
 
+    if (userId) {
+      where += `${
+        where.length > 0 ? ' AND' : 'WHERE'
+      } qaas.user_id = $${whereCount}`;
+      whereParam.push(userId);
+
+      whereCount++;
+    }
+
     const result = await this.database.query(
       `SELECT * FROM qaas 
         ${where}
@@ -68,7 +87,7 @@ export class QaaService {
     return result.rows;
   }
 
-  async getAllQaasGroupedByDate(from, to): Promise<QaaDto[]> {
+  async getAllQaasGroupedByDate(userId: number, from, to): Promise<QaaDto[]> {
     const result = await this.database.query(
       `
     SELECT DATE(created_at) AS date,
@@ -77,19 +96,20 @@ export class QaaService {
     'deleted_at', deleted_at) ORDER BY created_at DESC) AS qaas
     FROM qaas
     WHERE created_at >= $1 AND created_at <= $2
+    AND user_id = $3
     GROUP BY date
     ORDER BY date DESC;
     `,
-      [from, to],
+      [from, to, userId],
     );
     return result.rows;
   }
 
-  async insertQaa(qaa: QaaDto) {
+  async insertQaa(userId: number, qaa: QaaDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO qaas(question, answer, type, link) VALUES($1, $2, $3, $4) RETURNING *',
-        [qaa.question, qaa.answer, qaa.type, qaa.link],
+        'INSERT INTO qaas(question, answer, type, link, user_id) VALUES($1, $2, $3, $4, $5) RETURNING *',
+        [qaa.question, qaa.answer, qaa.type, qaa.link, userId],
       );
 
       console.log('Qaa inserted successfully:', result.rows[0]);
@@ -103,9 +123,12 @@ export class QaaService {
     }
   }
 
-  async updateQaa(id: number, updatedQaa: QaaDto) {
-    console.log('updatedQaa: ', updatedQaa);
+  async updateQaa(userId: number, id: number, updatedQaa: QaaDto) {
     try {
+      const foundQaa = await this.getQaaById(userId, id);
+      if (!foundQaa) {
+        throw new HttpException('Qaa not found', HttpStatus.NOT_FOUND);
+      }
       const result = await this.database.query(
         'UPDATE qaas SET question = $1, answer = $2, type = $3, link = $4, deleted_at = $5, updated_at = $6  WHERE id = $7 RETURNING *',
         [
@@ -134,9 +157,13 @@ export class QaaService {
     }
   }
 
-  async removeQaa(id: number) {
+  async removeQaa(userId: number, id: number) {
     const now = new Date().toISOString();
     try {
+      const foundQaa = await this.getQaaById(userId, id);
+      if (!foundQaa) {
+        throw new HttpException('Qaa not found', HttpStatus.NOT_FOUND);
+      }
       const result = await this.database.query(
         'UPDATE qaas SET deleted_at = $1 WHERE id = $2 RETURNING *',
         [now, id],
@@ -157,8 +184,12 @@ export class QaaService {
     }
   }
 
-  async deleteQaa(id: number) {
+  async deleteQaa(userId: number, id: number) {
     try {
+      const foundQaa = await this.getQaaById(userId, id);
+      if (!foundQaa) {
+        throw new HttpException('Qaa not found', HttpStatus.NOT_FOUND);
+      }
       const result = await this.database.query(
         'DELETE FROM qaas WHERE id = $1 RETURNING *',
         [id],
