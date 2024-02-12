@@ -88,6 +88,10 @@ export class QaaService {
   }
 
   async getAllQaasGroupedByDate(userId: number, from, to): Promise<QaaDto[]> {
+    const newFrom = new Date(from)
+    newFrom.setHours(0, 0, 0, 0);
+    const newTo = new Date(from)
+    newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
     SELECT DATE(created_at) AS date,
@@ -100,7 +104,7 @@ export class QaaService {
     GROUP BY date
     ORDER BY date DESC;
     `,
-      [from, to, userId],
+      [newFrom, newTo, userId],
     );
     return result.rows;
   }

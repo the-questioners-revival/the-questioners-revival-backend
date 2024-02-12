@@ -70,6 +70,10 @@ export class GoalService {
     from: string,
     to: string,
   ): Promise<GoalDto[]> {
+    const newFrom = new Date(from)
+    newFrom.setHours(0, 0, 0, 0);
+    const newTo = new Date(from)
+    newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
           SELECT DATE(given_at) AS date,
@@ -83,7 +87,7 @@ export class GoalService {
           GROUP BY date
           ORDER BY date DESC;
         `,
-      [userId, from, to],
+      [userId, newFrom, newTo],
     );
     return result.rows;
   }

@@ -46,6 +46,10 @@ export class BlogService {
   }
 
   async getAllBlogsGroupedByDate(userId: number, from, to): Promise<BlogDto[]> {
+    const newFrom = new Date(from)
+    newFrom.setHours(0, 0, 0, 0);
+    const newTo = new Date(from)
+    newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
         SELECT DATE(given_at) AS date,
@@ -58,7 +62,7 @@ export class BlogService {
         GROUP BY date
         ORDER BY date DESC;
       `,
-      [userId, from, to],
+      [userId, newFrom, newTo],
     );
     return result.rows;
   }

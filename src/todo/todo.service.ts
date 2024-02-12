@@ -96,6 +96,11 @@ export class TodoService {
   }
 
   async getAllTodosGroupedByDate(userId, from, to): Promise<TodoDto[]> {
+    const newFrom = new Date(from)
+    newFrom.setHours(0, 0, 0, 0);
+    const newTo = new Date(from)
+    newTo.setHours(23, 59, 59, 0);
+    
     const result = await this.database.query(
       `
         SELECT DATE(completed_at) AS date,
@@ -109,7 +114,7 @@ export class TodoService {
         GROUP BY date
         ORDER BY date DESC;
       `,
-      [from, to, userId],
+      [newFrom, newTo, userId],
     );
     return result.rows;
   }
@@ -121,10 +126,10 @@ export class TodoService {
         [todo.title, todo.type, todo.priority, TODO_STATUS.IN_PROGRESS, userId],
       );
 
-      console.log('Todo inserted successfully:', result.rows[0]);
+      
       return result.rows[0];
     } catch (error) {
-      console.error('Error inserting todo:', error);
+      
       throw new HttpException(
         'Error inserting todo: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -154,13 +159,13 @@ export class TodoService {
       );
 
       if (result.rows.length > 0) {
-        console.log('Todo updated successfully:', result.rows[0]);
+        
         return result.rows[0];
       } else {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      console.error('Error updating todo:', error);
+      
       throw new HttpException(
         'Error updating todo: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -189,13 +194,13 @@ export class TodoService {
       );
 
       if (result.rows.length > 0) {
-        console.log('Todo status updated successfully:', result.rows[0]);
+        
         return result.rows[0];
       } else {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      console.error('Error updating todo:', error);
+      
       throw new HttpException(
         'Error updating todo: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -216,13 +221,13 @@ export class TodoService {
       );
 
       if (result.rows.length > 0) {
-        console.log('Todo status updated successfully:', result.rows[0]);
+        
         return result.rows[0];
       } else {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      console.error('Error updating todo:', error);
+      
       throw new HttpException(
         'Error updating todo: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -250,13 +255,13 @@ export class TodoService {
       );
 
       if (result.rows.length > 0) {
-        console.log('Todo deleted successfully:', result.rows[0]);
+        
         return result.rows[0];
       } else {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      console.error('Error deleting todo:', error);
+      
       throw new HttpException(
         'Error deleting todo: ' + error,
         HttpStatus.BAD_REQUEST,
