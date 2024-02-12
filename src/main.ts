@@ -10,13 +10,15 @@ async function bootstrap() {
   dotenv.config();
   const app = await NestFactory.create(AppModule);
 
-  // app.use(helmet()).enableCors({
-  //   origin: ['http://localhost:3000', 'https://the-questioners-revival-frontend.vercel.app', 'https://the-questioners-revival-frontend.vercel.app/'],
-  //   credentials: true,
-  // })
+  app.use(helmet()).enableCors({
+    origin: [
+      'http://localhost:3000',
+      'https://the-questioners-revival-frontend.vercel.app',
+    ],
+  });
 
   app.use(cookieParser());
-  
+
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('The Questioners Revival API')

@@ -18,9 +18,24 @@ export class CookieUserMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: any, res: Response, next: NextFunction) {
-    // Extract user information from cookies
-    const cookies = req.cookies;
-    const token = cookies['token'];
+    const authorizationHeader = req.headers.authorization;
+
+    // Check if the authorization header exists
+    if (!authorizationHeader) {
+      // Handle the case when the header is missing
+      return res.status(401).json({ error: 'Authorization header is missing' });
+    }
+
+    // Split the authorization header to get the token
+    const [bearer, token] = authorizationHeader.split(' ');
+
+    // Check if the header format is correct
+    if (bearer !== 'Bearer' || !token) {
+      // Handle the case when the header format is invalid
+      return res
+        .status(401)
+        .json({ error: 'Invalid authorization header format' });
+    }
 
     // Verify the token
     try {
