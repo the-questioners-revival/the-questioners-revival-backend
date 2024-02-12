@@ -48,7 +48,7 @@ export class BlogService {
   async getAllBlogsGroupedByDate(userId: number, from, to): Promise<BlogDto[]> {
     const newFrom = new Date(from)
     newFrom.setHours(0, 0, 0, 0);
-    const newTo = new Date(from)
+    const newTo = new Date(to)
     newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
