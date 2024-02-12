@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(helmet()).enableCors({
-    origin: ['http://localhost:3000', 'https://the-questioners-revival-frontend.vercel.app'],
+    origin: ['http://localhost:3000', 'https://the-questioners-revival-frontend.vercel.app', 'https://the-questioners-revival-frontend.vercel.app/'],
     credentials: true,
   })
 
