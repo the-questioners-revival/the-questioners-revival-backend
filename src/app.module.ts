@@ -20,6 +20,7 @@ import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { CookieUserMiddleware } from './auth/cookie.middleware';
+import { CorsMiddleware } from './auth/cors.middleware';
 
 @Module({
   imports: [
@@ -44,6 +45,9 @@ import { CookieUserMiddleware } from './auth/cookie.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    // Apply the CorsMiddleware to all routes
+    consumer.apply(CorsMiddleware).forRoutes('*');
+
     // Apply the middleware to all routes except those related to authentication
     consumer
       .apply(CookieUserMiddleware)
