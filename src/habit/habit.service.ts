@@ -91,10 +91,11 @@ export class HabitService {
   async updateHabit(userId: number, id: number, updatedHabit: HabitDto) {
     try {
       const result = await this.database.query(
-        'UPDATE habits SET title = $1, type = $2, deleted_at = $3, updated_at = $4 WHERE id = $5 AND user_id = $6 RETURNING *',
+        'UPDATE habits SET title = $1, type = $2, repeat = $3, deleted_at = $4, updated_at = $5 WHERE id = $6 AND user_id = $7 RETURNING *',
         [
           updatedHabit.title,
           updatedHabit.type,
+          updatedHabit.repeat,
           updatedHabit.deleted_at,
           new Date().toISOString(),
           id,
