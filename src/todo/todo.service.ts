@@ -96,11 +96,11 @@ export class TodoService {
   }
 
   async getAllTodosGroupedByDate(userId, from, to): Promise<TodoDto[]> {
-    const newFrom = new Date(from)
+    const newFrom = new Date(from);
     newFrom.setHours(0, 0, 0, 0);
-    const newTo = new Date(to)
+    const newTo = new Date(to);
     newTo.setHours(23, 59, 59, 0);
-    
+
     const result = await this.database.query(
       `
         SELECT DATE(completed_at) AS date,
@@ -126,10 +126,8 @@ export class TodoService {
         [todo.title, todo.type, todo.priority, TODO_STATUS.IN_PROGRESS, userId],
       );
 
-      
       return result.rows[0];
     } catch (error) {
-      
       throw new HttpException(
         'Error inserting todo: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -159,13 +157,11 @@ export class TodoService {
       );
 
       if (result.rows.length > 0) {
-        
         return result.rows[0];
       } else {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      
       throw new HttpException(
         'Error updating todo: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -194,13 +190,11 @@ export class TodoService {
       );
 
       if (result.rows.length > 0) {
-        
         return result.rows[0];
       } else {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      
       throw new HttpException(
         'Error updating todo: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -221,13 +215,11 @@ export class TodoService {
       );
 
       if (result.rows.length > 0) {
-        
         return result.rows[0];
       } else {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      
       throw new HttpException(
         'Error updating todo: ' + error,
         HttpStatus.BAD_REQUEST,
@@ -255,13 +247,11 @@ export class TodoService {
       );
 
       if (result.rows.length > 0) {
-        
         return result.rows[0];
       } else {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
       }
     } catch (error) {
-      
       throw new HttpException(
         'Error deleting todo: ' + error,
         HttpStatus.BAD_REQUEST,

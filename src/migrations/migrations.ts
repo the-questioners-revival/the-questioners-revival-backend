@@ -184,4 +184,19 @@ export const migrations = [
       ADD COLUMN user_id INTEGER REFERENCES users(id);
     `,
   },
+  {
+    key: '20240216235600-ChangeTodoTitleToLongerText',
+    script: `
+      ALTER TABLE todos 
+      ALTER COLUMN title TYPE VARCHAR(1023);
+    `,
+  },  
+  {
+    key: '20240216235824-ChangeQaasAnswerToText',
+    script: `
+      ALTER TABLE qaas 
+      ALTER COLUMN answer TYPE TEXT,
+      ALTER COLUMN answer SET NOT NULL;
+    `,
+  },
 ];
