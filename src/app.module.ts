@@ -21,6 +21,7 @@ import { AuthService } from './auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { CookieUserMiddleware } from './auth/cookie.middleware';
 import { CorsMiddleware } from './auth/cors.middleware';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CorsMiddleware } from './auth/cors.middleware';
     ReviewModule,
     AuthModule,
     JwtModule,
+    DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],
