@@ -50,6 +50,7 @@ export class AppService {
       'todos' AS table_name,
       id,
       title AS text,
+      NULL AS answer,
       created_at,
       'title' AS column_name
       FROM todos 
@@ -60,26 +61,18 @@ export class AppService {
           'qaas' AS table_name,
           id, 
           question AS text,
+          answer,
           created_at,
           'question' AS column_name
       FROM qaas 
-      WHERE question ILIKE $1
-      AND qaas.user_id = $2
-      UNION ALL 
-      SELECT 
-          'qaas' AS table_name,
-          id, 
-          answer AS text,
-          created_at,
-          'answer' AS column_name
-      FROM qaas 
-      WHERE answer ILIKE $1
+      WHERE (question ILIKE $1 OR answer ILIKE $1)
       AND qaas.user_id = $2
       UNION ALL 
       SELECT 
           'blogs' AS table_name,
           id, 
           text,
+          NULL AS answer,
           created_at,
           'text' AS column_name
       FROM blogs 
@@ -90,6 +83,7 @@ export class AppService {
           'goals' AS table_name,
           id, 
           title AS text,
+          NULL AS answer,
           created_at,
           'title' AS column_name
       FROM goals 
@@ -100,6 +94,7 @@ export class AppService {
           'reviews' AS table_name,
           id, 
           text,
+          NULL AS answer,
           created_at,
           'text' AS column_name
       FROM reviews 
