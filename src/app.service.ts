@@ -73,7 +73,7 @@ export class AppService {
           id, 
           text,
           NULL AS answer,
-          created_at,
+          given_at as created_at,
           'text' AS column_name
       FROM blogs 
       WHERE text ILIKE $1
@@ -84,7 +84,7 @@ export class AppService {
           id, 
           title AS text,
           NULL AS answer,
-          created_at,
+          given_at as created_at,
           'title' AS column_name
       FROM goals 
       WHERE title ILIKE $1
@@ -95,7 +95,7 @@ export class AppService {
           id, 
           text,
           NULL AS answer,
-          created_at,
+          given_at as created_at,
           'text' AS column_name
       FROM reviews 
       WHERE text ILIKE $1
