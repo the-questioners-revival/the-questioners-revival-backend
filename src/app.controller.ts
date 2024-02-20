@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Request } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
@@ -22,7 +22,7 @@ export class AppController {
   @Get('search/:searchString')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  search(@Param('searchString') searchString?: string) {
-    return this.appService.search(searchString);
+  search(@Request() req, @Param('searchString') searchString?: string) {
+    return this.appService.search(searchString, req.user.id);
   }
 }

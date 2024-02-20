@@ -46,9 +46,9 @@ export class BlogService {
   }
 
   async getAllBlogsGroupedByDate(userId: number, from, to): Promise<BlogDto[]> {
-    const newFrom = new Date(from)
+    const newFrom = new Date(from);
     newFrom.setHours(0, 0, 0, 0);
-    const newTo = new Date(to)
+    const newTo = new Date(to);
     newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
@@ -87,12 +87,19 @@ export class BlogService {
 
   async updateBlog(userId: number, id: number, updatedBlog: BlogDto) {
     try {
+      const foundBlog = await this.getBlogById(userId, id);
+      if (!foundBlog) {
+        throw new HttpException('Blog not found', HttpStatus.NOT_FOUND);
+      }
+
       const result = await this.database.query(
         'UPDATE blogs SET text = $1, given_at = $2, deleted_at = $3, updated_at = $4 WHERE id = $5 AND user_id = $6 RETURNING *',
         [
-          updatedBlog.text,
-          updatedBlog.given_at,
-          updatedBlog.deleted_at,
+          updatedBlog.text ? updatedBlog.text : foundBlog.text,
+          updatedBlog.given_at ? updatedBlog.given_at : foundBlog.given_at,
+          updatedBlog.deleted_at
+            ? updatedBlog.deleted_at
+            : foundBlog.deleted_at,
           new Date().toISOString(),
           id,
           userId,

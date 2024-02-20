@@ -30,7 +30,10 @@ export class ReviewService {
   }
 
   async getAllReviews(userId: number): Promise<ReviewDto[]> {
-    const result = await this.database.query('SELECT * FROM reviews WHERE user_id = $1', [userId]);
+    const result = await this.database.query(
+      'SELECT * FROM reviews WHERE user_id = $1',
+      [userId],
+    );
     return result.rows;
   }
 
@@ -55,10 +58,14 @@ export class ReviewService {
     return result.rows;
   }
 
-  async getAllReviewsGroupedByDate(userId: number, from, to): Promise<ReviewDto[]> {
-    const newFrom = new Date(from)
+  async getAllReviewsGroupedByDate(
+    userId: number,
+    from,
+    to,
+  ): Promise<ReviewDto[]> {
+    const newFrom = new Date(from);
     newFrom.setHours(0, 0, 0, 0);
-    const newTo = new Date(to)
+    const newTo = new Date(to);
     newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
@@ -98,14 +105,23 @@ export class ReviewService {
 
   async updateReview(userId: number, id: number, updatedReview: ReviewDto) {
     try {
+      const foundReview = await this.getReviewById(userId, id);
+      if (!foundReview) {
+        throw new HttpException('Review not found', HttpStatus.NOT_FOUND);
+      }
+
       const result = await this.database.query(
         `UPDATE reviews SET text = $1, type = $2, given_at = $3, deleted_at = $4, updated_at = $5
             WHERE id = $6 AND user_id = $7 RETURNING *`,
         [
-          updatedReview.text,
-          updatedReview.type,
-          updatedReview.given_at,
-          updatedReview.deleted_at,
+          updatedReview.text ? updatedReview.text : foundReview.text,
+          updatedReview.type ? updatedReview.type : foundReview.type,
+          updatedReview.given_at
+            ? updatedReview.given_at
+            : foundReview.given_at,
+          updatedReview.deleted_at
+            ? updatedReview.deleted_at
+            : foundReview.deleted_at,
           new Date().toISOString(),
           id,
           userId,

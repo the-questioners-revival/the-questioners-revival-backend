@@ -42,60 +42,72 @@ export class AppService {
     return res.quotes[randomNumber];
   }
 
-  async search(searchString: string) {
+  async search(searchString: string, userId: number) {
     console.log('searchString: ', searchString);
     const result = await this.database.query(
       `
-    SELECT 
+      SELECT 
       'todos' AS table_name,
-      id, 
-      title AS text 
-    FROM todos 
-    WHERE title ILIKE $1
-    UNION ALL 
-    SELECT 
-      'qaas' AS table_name,
-      id, 
-      question AS text 
-    FROM qaas 
-    WHERE question ILIKE $1
-    UNION ALL 
-    SELECT 
-      'qaas' AS table_name,
-      id, 
-      answer AS text 
-    FROM qaas 
-    WHERE answer ILIKE $1
-    UNION ALL 
-    SELECT 
-      'habits' AS table_name,
-      id, 
-      title AS text 
-    FROM habits 
-    WHERE title ILIKE $1
-    UNION ALL 
-    SELECT 
-      'blogs' AS table_name,
-      id, 
-      text 
-    FROM blogs 
-    WHERE text ILIKE $1
-    UNION ALL 
-    SELECT 
-      'goals' AS table_name,
-      id, 
-      title AS text
-    FROM goals 
-    WHERE title ILIKE $1
-    UNION ALL 
-    SELECT 
-      'reviews' AS table_name,
-      id, 
-      text
-    FROM reviews 
-    WHERE text ILIKE $1
+      id,
+      title AS text,
+      created_at,
+      'title' AS column_name
+      FROM todos 
+      WHERE title ILIKE $1
+      AND todos.user_id = $2
+      UNION ALL 
+      SELECT 
+          'qaas' AS table_name,
+          id, 
+          question AS text,
+          created_at,
+          'question' AS column_name
+      FROM qaas 
+      WHERE question ILIKE $1
+      AND qaas.user_id = $2
+      UNION ALL 
+      SELECT 
+          'qaas' AS table_name,
+          id, 
+          answer AS text,
+          created_at,
+          'answer' AS column_name
+      FROM qaas 
+      WHERE answer ILIKE $1
+      AND qaas.user_id = $2
+      UNION ALL 
+      SELECT 
+          'blogs' AS table_name,
+          id, 
+          text,
+          created_at,
+          'text' AS column_name
+      FROM blogs 
+      WHERE text ILIKE $1
+      AND blogs.user_id = $2
+      UNION ALL 
+      SELECT 
+          'goals' AS table_name,
+          id, 
+          title AS text,
+          created_at,
+          'title' AS column_name
+      FROM goals 
+      WHERE title ILIKE $1
+      AND goals.user_id = $2
+      UNION ALL 
+      SELECT 
+          'reviews' AS table_name,
+          id, 
+          text,
+          created_at,
+          'text' AS column_name
+      FROM reviews 
+      WHERE text ILIKE $1
+      AND reviews.user_id = $2
+      ORDER by created_at DESC
   `,
-      [`%${searchString}%`],
+      [`%${searchString}%`, userId],
     );
 
     return result.rows;

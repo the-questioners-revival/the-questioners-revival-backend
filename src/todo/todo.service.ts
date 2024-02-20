@@ -145,12 +145,16 @@ export class TodoService {
       const result = await this.database.query(
         'UPDATE todos SET title = $1, type = $2, priority = $3, status = $4, completed_at = $5, deleted_at = $6, updated_at = $7 WHERE id = $8 RETURNING *',
         [
-          updatedTodo.title,
-          updatedTodo.type,
-          updatedTodo.priority,
-          updatedTodo.status,
-          updatedTodo.completed_at,
-          updatedTodo.deleted_at,
+          updatedTodo.title ? updatedTodo.title : foundTodo.title,
+          updatedTodo.type ? updatedTodo.type : foundTodo.type,
+          updatedTodo.priority ? updatedTodo.priority : foundTodo.priority,
+          updatedTodo.status ? updatedTodo.status : foundTodo.status,
+          updatedTodo.completed_at
+            ? updatedTodo.completed_at
+            : foundTodo.completed_at,
+          updatedTodo.deleted_at
+            ? updatedTodo.deleted_at
+            : foundTodo.deleted_at,
           new Date().toISOString(),
           id,
         ],

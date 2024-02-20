@@ -88,9 +88,9 @@ export class QaaService {
   }
 
   async getAllQaasGroupedByDate(userId: number, from, to): Promise<QaaDto[]> {
-    const newFrom = new Date(from)
+    const newFrom = new Date(from);
     newFrom.setHours(0, 0, 0, 0);
-    const newTo = new Date(to)
+    const newTo = new Date(to);
     newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
@@ -136,11 +136,11 @@ export class QaaService {
       const result = await this.database.query(
         'UPDATE qaas SET question = $1, answer = $2, type = $3, link = $4, deleted_at = $5, updated_at = $6  WHERE id = $7 RETURNING *',
         [
-          updatedQaa.question,
-          updatedQaa.answer,
-          updatedQaa.type,
-          updatedQaa.link,
-          updatedQaa.deleted_at,
+          updatedQaa.question ? updatedQaa.question : foundQaa.question,
+          updatedQaa.answer ? updatedQaa.answer : foundQaa.answer,
+          updatedQaa.type ? updatedQaa.type : foundQaa.type,
+          updatedQaa.link ? updatedQaa.link : foundQaa.link,
+          updatedQaa.deleted_at ? updatedQaa.deleted_at : foundQaa.deleted_at,
           new Date().toISOString(),
           id,
         ],

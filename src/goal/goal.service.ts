@@ -70,9 +70,9 @@ export class GoalService {
     from: string,
     to: string,
   ): Promise<GoalDto[]> {
-    const newFrom = new Date(from)
+    const newFrom = new Date(from);
     newFrom.setHours(0, 0, 0, 0);
-    const newTo = new Date(to)
+    const newTo = new Date(to);
     newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
@@ -112,15 +112,24 @@ export class GoalService {
 
   async updateGoal(userId: number, id: number, updatedGoal: GoalDto) {
     try {
+      const foundGoal = await this.getGoalById(userId, id);
+      if (!foundGoal) {
+        throw new HttpException('Goal not found', HttpStatus.NOT_FOUND);
+      }
+
       const result = await this.database.query(
         `UPDATE goals SET title = $1, type = $2, given_at = $3, completed_at = $4, deleted_at = $5, updated_at = $6 
           WHERE id = $7 AND user_id = $8 RETURNING *`,
         [
-          updatedGoal.title,
-          updatedGoal.type,
-          updatedGoal.given_at,
-          updatedGoal.completed_at,
-          updatedGoal.deleted_at,
+          updatedGoal.title ? updatedGoal.title : foundGoal.title,
+          updatedGoal.type ? updatedGoal.type : foundGoal.type,
+          updatedGoal.given_at ? updatedGoal.given_at : foundGoal.given_at,
+          updatedGoal.completed_at
+            ? updatedGoal.completed_at
+            : foundGoal.completed_at,
+          updatedGoal.deleted_at
+            ? updatedGoal.deleted_at
+            : foundGoal.deleted_at,
           new Date().toISOString(),
           id,
           userId,
