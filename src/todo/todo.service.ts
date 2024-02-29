@@ -137,6 +137,7 @@ export class TodoService {
 
   async updateTodo(userId: number, id: number, updatedTodo: TodoDto) {
     try {
+      console.log('updatedTodo: ', updatedTodo);
       const foundTodo = await this.getTodoById(userId, id);
       if (!foundTodo) {
         throw new HttpException('Todo not found', HttpStatus.NOT_FOUND);
@@ -149,12 +150,8 @@ export class TodoService {
           updatedTodo.type ? updatedTodo.type : foundTodo.type,
           updatedTodo.priority ? updatedTodo.priority : foundTodo.priority,
           updatedTodo.status ? updatedTodo.status : foundTodo.status,
-          updatedTodo.completed_at
-            ? updatedTodo.completed_at
-            : foundTodo.completed_at,
-          updatedTodo.deleted_at
-            ? updatedTodo.deleted_at
-            : foundTodo.deleted_at,
+          updatedTodo.completed_at,
+          updatedTodo.deleted_at,
           new Date().toISOString(),
           id,
         ],

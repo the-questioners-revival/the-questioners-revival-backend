@@ -140,7 +140,7 @@ export class QaaService {
           updatedQaa.answer ? updatedQaa.answer : foundQaa.answer,
           updatedQaa.type ? updatedQaa.type : foundQaa.type,
           updatedQaa.link ? updatedQaa.link : foundQaa.link,
-          updatedQaa.deleted_at ? updatedQaa.deleted_at : foundQaa.deleted_at,
+          updatedQaa.deleted_at,
           new Date().toISOString(),
           id,
         ],

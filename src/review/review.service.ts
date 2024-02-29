@@ -119,9 +119,7 @@ export class ReviewService {
           updatedReview.given_at
             ? updatedReview.given_at
             : foundReview.given_at,
-          updatedReview.deleted_at
-            ? updatedReview.deleted_at
-            : foundReview.deleted_at,
+          updatedReview.deleted_at,
           new Date().toISOString(),
           id,
           userId,

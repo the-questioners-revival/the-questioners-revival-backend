@@ -124,12 +124,8 @@ export class GoalService {
           updatedGoal.title ? updatedGoal.title : foundGoal.title,
           updatedGoal.type ? updatedGoal.type : foundGoal.type,
           updatedGoal.given_at ? updatedGoal.given_at : foundGoal.given_at,
-          updatedGoal.completed_at
-            ? updatedGoal.completed_at
-            : foundGoal.completed_at,
-          updatedGoal.deleted_at
-            ? updatedGoal.deleted_at
-            : foundGoal.deleted_at,
+          updatedGoal.completed_at,
+          updatedGoal.deleted_at,
           new Date().toISOString(),
           id,
           userId,

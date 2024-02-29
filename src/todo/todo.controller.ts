@@ -77,6 +77,7 @@ export class TodoController {
 
   @Get('9gag2')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async get9GagCommentsPictures() {
     const axios = require('axios');
     const fs = require('fs');
@@ -135,6 +136,7 @@ export class TodoController {
 
   @Post('9gag/:url')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async get9GagComments(@Param('url') url: string) {
     const postKey = url.split('/').pop();
     const axios = require('axios');
