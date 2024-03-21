@@ -51,6 +51,7 @@ export class AppService {
       id,
       title AS text,
       NULL AS answer,
+      NULL AS link,
       created_at,
       'title' AS column_name
       FROM todos 
@@ -62,10 +63,11 @@ export class AppService {
           id, 
           question AS text,
           answer,
+          link,
           created_at,
           'question' AS column_name
       FROM qaas 
-      WHERE (question ILIKE $1 OR answer ILIKE $1)
+      WHERE (question ILIKE $1 OR answer ILIKE $1 OR link ILIKE $1)
       AND qaas.user_id = $2
       UNION ALL 
       SELECT 
@@ -73,6 +75,7 @@ export class AppService {
           id, 
           text,
           NULL AS answer,
+          NULL AS link,
           given_at as created_at,
           'text' AS column_name
       FROM blogs 
@@ -84,6 +87,7 @@ export class AppService {
           id, 
           title AS text,
           NULL AS answer,
+          NULL AS link,
           given_at as created_at,
           'title' AS column_name
       FROM goals 
@@ -95,6 +99,7 @@ export class AppService {
           id, 
           text,
           NULL AS answer,
+          NULL AS link,
           given_at as created_at,
           'text' AS column_name
       FROM reviews 
