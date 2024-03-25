@@ -14,6 +14,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'https://the-questioners-revival-frontend.vercel.app',
+      process.env.ORIGIN
     ],
   });
 
