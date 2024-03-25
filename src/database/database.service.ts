@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Client, Pool } from '  ';
+import { Client, Pool } from 'pg';
 
 @Injectable()
 export class DatabaseService {
@@ -21,7 +21,7 @@ export class DatabaseService {
         port: this.configService.get('POSTGRESQL_PORT'),
         max: 20,
         idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 200000,
+        connectionTimeoutMillis: 30000,
         ssl: this.configService.get('NODE_ENV') ==='prod' ? true: false,
       });
 
