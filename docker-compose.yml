@@ -5,7 +5,9 @@ services:
     image: postgres:13
     container_name: postgres
     environment:
-      POSTGRES_PASSWORD: jS{ZN>&JE<)h-8q5$'GM=H
+      POSTGRES_PASSWORD: BVGbfHyDjxWAvkCaeYM4JU59ZnTt8p
+      POSTGRES_USER: user
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
