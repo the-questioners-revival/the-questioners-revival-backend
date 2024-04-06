@@ -76,14 +76,14 @@ export class GoalService {
     newTo.setHours(23, 59, 59, 0);
     const result = await this.database.query(
       `
-          SELECT DATE(given_at) AS date,
-          JSON_AGG(json_build_object('id', id, 'text', text, 'given_at', given_at, 
-          'created_at', created_at, 'updated_at', updated_at, 
+          SELECT DATE(completed_at) AS date,
+          JSON_AGG(json_build_object('id', id, 'title', title, 'type', type, 'given_at', given_at, 
+          'created_at', created_at, 'updated_at', updated_at, 'completed_at', completed_at,
           'deleted_at', deleted_at) ORDER BY given_at DESC) AS goals
           FROM goals
           WHERE user_id = $1
           AND deleted_at IS NULL
-          AND created_at >= $2 AND created_at <= $3
+          AND completed_at >= $2 AND completed_at <= $3
           GROUP BY date
           ORDER BY date DESC;
         `,
