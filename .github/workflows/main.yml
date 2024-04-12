@@ -20,6 +20,7 @@ env:
   POSTGRESQL_DB: ${{ secrets.POSTGRESQL_DB }}
   NODE_ENV: ${{ secrets.NODE_ENV }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  ORIGIN: ${{ secrets.ORIGIN }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
