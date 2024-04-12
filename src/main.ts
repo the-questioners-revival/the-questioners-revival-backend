@@ -12,7 +12,7 @@ async function bootstrap() {
 
   app.use(helmet()).enableCors({
     origin: [
-      'http://localhost:3000',
+      'http://localhost:3001',
       'https://the-questioners-revival-frontend.vercel.app',
       process.env.ORIGIN
     ],
@@ -29,6 +29,8 @@ async function bootstrap() {
     .build();
 
   setTZ('UTC');
+
+  console.log("start test")
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
