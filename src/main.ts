@@ -30,8 +30,6 @@ async function bootstrap() {
 
   setTZ('UTC');
 
-  console.log("start test")
-
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
