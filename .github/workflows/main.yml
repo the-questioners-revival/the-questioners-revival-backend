@@ -51,14 +51,13 @@ jobs:
 
     steps:
       # Kill React app already running
-      - name: Kill TQR FE
+      - name: Kill TQR BE
         run: pkill -f "node dist/main.js --name=TQR_BE" || true
 
       # Run React Using Serve with Nohup
-      - name: Run fe
+      - name: Run BE
         run: |
           source ~/.nvm/nvm.sh
           nvm use 18.13.0
-          cd ..
           RUNNER_TRACKING_ID="" && nohup node dist/main.js --name=TQR_BE > error &
 
