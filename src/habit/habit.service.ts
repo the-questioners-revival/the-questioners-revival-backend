@@ -64,9 +64,10 @@ export class HabitService {
 
   async getDailyHabits(userId: number): Promise<HabitDto[]> {
     const result = await this.database.query(
-      `SELECT * FROM habits WHERE user_id = $1 AND habits.repeat = 'daily AND habits.deleted_at IS NULL'`,
+      `SELECT * FROM habits WHERE user_id = $1 AND habits.repeat = 'daily' AND habits.deleted_at IS NULL`,
       [userId],
     );
+    console.log(' getDailyHabits result: ', result.rows);
     return result.rows;
   }
 
