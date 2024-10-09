@@ -18,4 +18,7 @@ export class BlogDto {
 
   @ApiProperty()
   deleted_at: Date;
+
+  @ApiProperty()
+  todo_id: number;
 }

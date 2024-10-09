@@ -70,6 +70,22 @@ export class BlogController {
     }
   }
 
+  @Get('getByTodoId/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getBlogByTodoId(@Request() req, @Param('id') id: number) {
+    console.log('id: ', id);
+    try {
+      const blog = await this.blogService.getBlogByTodoId(req.user.id, id);
+      return blog;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new NotFoundException(`Error fetching blog: ${error.message}`);
+    }
+  }
+
   @Post()
   @ApiBody({ type: BlogDto })
   @ApiResponse({ status: 201, description: 'Blog created', type: BlogDto })

@@ -199,4 +199,15 @@ export const migrations = [
       ALTER COLUMN answer SET NOT NULL;
     `,
   },
+  {
+    key: '20241008175425-AddForeignKeyForTodoInBlog',
+    script: `
+      ALTER TABLE blogs
+      ADD COLUMN todo_id INTEGER;
+      ALTER TABLE blogs
+      ADD CONSTRAINT fk_todo
+      FOREIGN KEY (todo_id)
+      REFERENCES todos(id);
+    `,
+  },
 ];

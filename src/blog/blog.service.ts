@@ -29,6 +29,19 @@ export class BlogService {
     }
   }
 
+  async getBlogByTodoId(userId: number, id: number): Promise<BlogDto> {
+    const result = await this.database.query(
+      'SELECT * FROM blogs WHERE todo_id = $1 AND user_id = $2',
+      [id, userId],
+    );
+
+    if (result.rows.length > 0) {
+      return result.rows[0];
+    } else {
+      throw new NotFoundException(`Blog with todo id ${id} not found`);
+    }
+  }
+
   async getAllBlogs(userId: number): Promise<BlogDto[]> {
     const result = await this.database.query(
       'SELECT * FROM blogs WHERE user_id = $1',
@@ -55,7 +68,7 @@ export class BlogService {
         SELECT DATE(given_at) AS date,
         JSON_AGG(json_build_object('id', id, 'text', text, 'given_at', given_at, 
         'created_at', created_at, 'updated_at', updated_at, 
-        'deleted_at', deleted_at) ORDER BY given_at DESC) AS blogs
+        'deleted_at', deleted_at, 'todo_id', todo_id) ORDER BY given_at DESC) AS blogs
         FROM blogs
         WHERE user_id = $1 AND deleted_at IS NULL
         AND given_at >= $2 AND given_at <= $3
@@ -70,8 +83,8 @@ export class BlogService {
   async insertBlog(userId: number, blog: BlogDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO blogs(text, given_at, user_id) VALUES($1, $2, $3) RETURNING *',
-        [blog.text, blog.given_at, userId],
+        'INSERT INTO blogs(text, given_at, user_id, todo_id) VALUES($1, $2, $3, $4) RETURNING *',
+        [blog.text, blog.given_at, userId, blog.todo_id],
       );
 
       console.log('Blog inserted successfully:', result.rows[0]);
@@ -93,7 +106,7 @@ export class BlogService {
       }
 
       const result = await this.database.query(
-        'UPDATE blogs SET text = $1, given_at = $2, deleted_at = $3, updated_at = $4 WHERE id = $5 AND user_id = $6 RETURNING *',
+        'UPDATE blogs SET text = $1, given_at = $2, deleted_at = $3, updated_at = $4, todo_id = $5 WHERE id = $6 AND user_id = $7 RETURNING *',
         [
           updatedBlog.text ? updatedBlog.text : foundBlog.text,
           updatedBlog.given_at ? updatedBlog.given_at : foundBlog.given_at,
@@ -101,6 +114,7 @@ export class BlogService {
             ? updatedBlog.deleted_at
             : foundBlog.deleted_at,
           new Date().toISOString(),
+          updatedBlog.todo_id,
           id,
           userId,
         ],
