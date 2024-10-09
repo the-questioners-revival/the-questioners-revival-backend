@@ -55,7 +55,9 @@ export class TodoService {
 
     const result = await this.database.query(
       `SELECT * FROM todos
-        ${where}`,
+        ${where}
+        ORDER by todos.created_at DESC
+        `,
       [...whereParam],
     );
     return result.rows;
@@ -106,15 +108,26 @@ export class TodoService {
     }
 
     const result = await this.database.query(
-      `SELECT todos.*, blogs.id blog_id FROM todos 
+      `SELECT todos.*, blogs.id blog_id, blogs.text blog_text, blogs.todo_id blog_todo_id FROM todos 
       LEFT JOIN blogs ON blogs.todo_id = todos.id
       ${where}
       ORDER by todos.created_at DESC
       `,
       [...whereParam],
     );
-    console.log('result: ', result.rows);
-    return result.rows;
+
+    const todos = result.rows;
+
+    // You can create the final structure directly without a second query
+    const todosWithBlogs = todos.map((todo) => ({
+      ...todo,
+      blog: todo.blog_id
+        ? { id: todo.blog_id, text: todo.blog_text, todo_id: todo.blog_todo_id }
+        : null,
+    }));
+
+    console.log('todosWithBlogs: ', todosWithBlogs);
+    return todosWithBlogs;
   }
 
   async getAllTodosGroupedByDate(userId, from, to): Promise<TodoDto[]> {
