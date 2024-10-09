@@ -32,9 +32,10 @@ export class TodoController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiQuery({ name: 'status', required: false })
   @ApiBearerAuth()
-  async getAllTodos(@Request() req) {
-    const todos = await this.todoService.getAllTodos(req.user.id);
+  async getAllTodos(@Request() req, @Query('status') status?: string) {
+    const todos = await this.todoService.getAllTodos(req.user.id, status);
     return todos;
   }
 
@@ -76,8 +77,8 @@ export class TodoController {
   }
 
   @Get('9gag2')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
   async get9GagCommentsPictures() {
     const axios = require('axios');
     const fs = require('fs');
@@ -135,8 +136,8 @@ export class TodoController {
   }
 
   @Post('9gag/:url')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
   async get9GagComments(@Param('url') url: string) {
     const postKey = url.split('/').pop();
     const axios = require('axios');

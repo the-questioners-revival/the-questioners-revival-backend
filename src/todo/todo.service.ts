@@ -32,11 +32,31 @@ export class TodoService {
     }
   }
 
-  async getAllTodos(userId: number): Promise<TodoDto[]> {
+  async getAllTodos(userId: number, status: string): Promise<TodoDto[]> {
+    let whereCount = 1;
+    const whereParam = [];
+    let where = '';
+
+    if (status) {
+      where += `where todos.status = $${whereCount}`;
+      whereParam.push(status);
+
+      whereCount++;
+    }
+
+    if (userId) {
+      where += `${
+        where.length > 0 ? ' AND' : 'WHERE'
+      } todos.user_id = $${whereCount}`;
+      whereParam.push(userId);
+
+      whereCount++;
+    }
+
     const result = await this.database.query(
       `SELECT * FROM todos
-        WHERE user_id = $1`,
-      [userId],
+        ${where}`,
+      [...whereParam],
     );
     return result.rows;
   }
@@ -86,12 +106,14 @@ export class TodoService {
     }
 
     const result = await this.database.query(
-      `SELECT * FROM todos 
+      `SELECT todos.*, blogs.id blog_id FROM todos 
+      LEFT JOIN blogs ON blogs.todo_id = todos.id
       ${where}
       ORDER by todos.created_at DESC
       `,
       [...whereParam],
     );
+    console.log('result: ', result.rows);
     return result.rows;
   }
 
@@ -103,19 +125,21 @@ export class TodoService {
 
     const result = await this.database.query(
       `
-        SELECT DATE(completed_at) AS date,
-        JSON_AGG(json_build_object('id', id, 'title', title, 'type', type, 
-        'status', status, 'created_at', created_at, 'updated_at', updated_at, 
-        'completed_at', completed_at, 'deleted_at', deleted_at) ORDER BY completed_at DESC) AS todos
-        FROM todos
-        WHERE todos.completed_at IS NOT NULL
-        AND completed_at >= $1 AND completed_at <= $2
-        AND user_id =$3
-        GROUP BY date
-        ORDER BY date DESC;
+      SELECT DATE(completed_at) AS date,
+      JSON_AGG(json_build_object('id', todos.id, 'title', title, 'type', type, 
+      'status', status, 'created_at', todos.created_at, 'updated_at', todos.updated_at, 
+      'completed_at', todos.completed_at, 'deleted_at', todos.deleted_at, 'blog_id', blogs.id) ORDER BY completed_at DESC) AS todos
+      FROM todos
+      LEFT JOIN blogs ON blogs.todo_id = todos.id
+      WHERE todos.completed_at IS NOT NULL
+      AND completed_at >= $1 AND completed_at <= $2
+      AND todos.user_id =$3
+      GROUP BY date
+      ORDER BY date DESC;
       `,
       [newFrom, newTo, userId],
     );
+    console.log('result: ', result.rows);
     return result.rows;
   }
 
