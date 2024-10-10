@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TodoSchedulesService } from './todo-schedules.service';
-import { TodoSchedulesController } from './todo-schedules.controller';
+import { TodoScheduleService } from './todo-schedule.service';
+import { TodoScheduleController } from './todo-schedule.controller';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  providers: [TodoSchedulesService],
-  controllers: [TodoSchedulesController]
+  providers: [TodoScheduleService],
+  controllers: [TodoScheduleController],
+  imports: [JwtModule],
 })
-export class TodoSchedulesModule {}
+export class TodoScheduleModule {}

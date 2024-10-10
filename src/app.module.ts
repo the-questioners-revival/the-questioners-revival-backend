@@ -22,7 +22,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { CookieUserMiddleware } from './auth/cookie.middleware';
 import { CorsMiddleware } from './auth/cors.middleware';
 import { DatabaseModule } from './database/database.module';
-import { TodoSchedulesModule } from './todo-schedules/todo-schedules.module';
+import { TodoScheduleModule } from './todo-schedules/todo-schedule.module';
 
 @Module({
   imports: [
@@ -41,7 +41,7 @@ import { TodoSchedulesModule } from './todo-schedules/todo-schedules.module';
     AuthModule,
     JwtModule,
     DatabaseModule,
-    TodoSchedulesModule,
+    TodoScheduleModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],

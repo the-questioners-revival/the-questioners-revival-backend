@@ -54,49 +54,4 @@ export class TodoScheduleController {
 
     return { message: 'TodoSchedule created successfully', todoSchedule: newTodoSchedule };
   }
-
-  @Put(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  async updateTodoSchedule(
-    @Req() req,
-    @Param('id') id: number,
-    @Body() updatedTodoSchedule: TodoScheduleDto,
-  ) {
-    try {
-      const updated = await this.todoScheduleService.updateTodoSchedule(
-        req.user.id,
-        id,
-        updatedTodoSchedule,
-      );
-      return { message: 'TodoSchedule updated successfully', todoSchedule: updated };
-    } catch (error) {
-      return { error: error.message };
-    }
-  }
-
-  @Post('remove/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  async removeTodoSchedule(@Req() req, @Param('id') id: number) {
-    try {
-      const todoSchedule = await this.todoScheduleService.removeTodoSchedule(req.user.id, id);
-      return { message: 'TodoSchedule removed successfully', todoSchedule };
-    } catch (error) {
-      // Handle errors
-      return { error: error.message };
-    }
-  }
-
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  async deleteTodoSchedule(@Req() req, @Param('id') id: number) {
-    try {
-      const deleted = await this.todoScheduleService.deleteTodoSchedule(req.user.id, id);
-      return { message: 'TodoSchedule deleted successfully', todoSchedule: deleted };
-    } catch (error) {
-      return { error: error.message };
-    }
-  }
 }
