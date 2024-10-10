@@ -109,22 +109,31 @@ export class TodoService {
 
     const result = await this.database.query(
       `SELECT todos.*, 
-              json_agg(DISTINCT jsonb_build_object(
-                  'id', blogs.id, 
-                  'text', blogs.text, 
-                  'todo_id', blogs.todo_id
-              )) AS blogs,
-              json_agg(DISTINCT jsonb_build_object(
-                  'scheduled_date', todo_schedules.scheduled_date, 
-                  'todo_id', todo_schedules.todo_id,
-                  'todo_schedule_id', todo_schedules.id
-              )) AS schedules
-       FROM todos 
-       LEFT JOIN blogs ON blogs.todo_id = todos.id
-       LEFT JOIN todo_schedules ON todo_schedules.todo_id = todos.id
-       ${where} 
-       GROUP BY todos.id 
-       ORDER BY todos.created_at DESC`,
+            CASE 
+                WHEN jsonb_array_length(
+                    jsonb_agg(DISTINCT jsonb_build_object(
+                        'id', blogs.id, 
+                        'text', blogs.text, 
+                        'todo_id', blogs.todo_id
+                    )) FILTER (WHERE blogs.id IS NOT NULL)) = 0 
+                THEN NULL 
+                ELSE jsonb_agg(DISTINCT jsonb_build_object(
+                    'id', blogs.id, 
+                    'text', blogs.text, 
+                    'todo_id', blogs.todo_id
+                )) FILTER (WHERE blogs.id IS NOT NULL) 
+            END AS blogs,
+            jsonb_agg(DISTINCT jsonb_build_object(
+                'scheduled_date', todo_schedules.scheduled_date, 
+                'todo_id', todo_schedules.todo_id,
+                'todo_schedule_id', todo_schedules.id
+            )) AS schedules
+      FROM todos 
+      LEFT JOIN blogs ON blogs.todo_id = todos.id
+      LEFT JOIN todo_schedules ON todo_schedules.todo_id = todos.id
+      ${where} 
+      GROUP BY todos.id 
+      ORDER BY todos.created_at DESC`,
       [...whereParam],
     );
 
