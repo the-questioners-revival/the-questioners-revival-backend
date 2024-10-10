@@ -9,6 +9,7 @@ import {
   Put,
   Query,
   Req,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { TodoScheduleService } from './todo-schedule.service';
@@ -28,6 +29,23 @@ export class TodoScheduleController {
     const todoSchedules = await this.todoScheduleService.getAllTodoSchedules(req.user.id);
     return todoSchedules;
   }
+
+  @Get('groupedByDate')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getAllSchedulesGroupedByDate(
+    @Request() req,
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ) {
+    const todoScheduleList = await this.todoScheduleService.getAllSchedulesGroupedByDate(
+      req.user.id,
+      from,
+      to,
+    );
+    return todoScheduleList;
+  }
+  
 
   @Get('getById/:id')
   @UseGuards(JwtAuthGuard)
