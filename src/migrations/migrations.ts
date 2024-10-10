@@ -190,7 +190,7 @@ export const migrations = [
       ALTER TABLE todos 
       ALTER COLUMN title TYPE VARCHAR(1023);
     `,
-  },  
+  },
   {
     key: '20240216235824-ChangeQaasAnswerToText',
     script: `
@@ -210,4 +210,16 @@ export const migrations = [
       REFERENCES todos(id);
     `,
   },
+  {
+    key: '20241010123400-CreateTodoScheduleTable',
+    script: `
+    CREATE TABLE todo_schedules (
+      id SERIAL PRIMARY KEY,
+      todo_id INTEGER NOT NULL,
+      scheduled_date DATE NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (todo_id) REFERENCES todos(id)
+    );
+  `,
+  }
 ];
