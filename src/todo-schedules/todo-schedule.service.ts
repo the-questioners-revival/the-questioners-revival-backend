@@ -18,7 +18,7 @@ import {
   
     async getTodoScheduleById(userId: number, id: number): Promise<TodoScheduleDto> {
       const result = await this.database.query(
-        `SELECT * FROM todoSchedules WHERE id = $1
+        `SELECT * FROM todo_schedules WHERE id = $1
         AND user_id = $2`,
         [id, userId],
       );
@@ -32,7 +32,7 @@ import {
   
     async getAllTodoSchedules(userId: number): Promise<TodoScheduleDto[]> {
       const result = await this.database.query(
-        'SELECT * FROM todoSchedules WHERE user_id = $1',
+        'SELECT * FROM todo_schedules WHERE user_id = $1',
         [userId],
       );
       return result.rows;
@@ -41,7 +41,7 @@ import {
     async insertTodoSchedule(userId: number, todoSchedule: TodoScheduleDto) {
       try {
         const result = await this.database.query(
-          'INSERT INTO todoSchedules(todo_id, scheduled_date) VALUES($1, $2) RETURNING *',
+          'INSERT INTO todo_schedules(todo_id, scheduled_date) VALUES($1, $2) RETURNING *',
           [todoSchedule.todo_id, todoSchedule.scheduled_date],
         );
   
