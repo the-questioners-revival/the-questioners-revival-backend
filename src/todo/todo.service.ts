@@ -109,57 +109,33 @@ export class TodoService {
 
     const result = await this.database.query(
       `SELECT todos.*, 
-              blogs.id AS blog_id, 
-              blogs.text AS blog_text, 
-              blogs.todo_id AS blog_todo_id,
-              todo_schedules.scheduled_date,
-              todo_schedules.todo_id,
-              todo_schedules.id todo_schedule_id
+              json_agg(DISTINCT jsonb_build_object(
+                  'id', blogs.id, 
+                  'text', blogs.text, 
+                  'todo_id', blogs.todo_id
+              )) AS blogs,
+              json_agg(DISTINCT jsonb_build_object(
+                  'scheduled_date', todo_schedules.scheduled_date, 
+                  'todo_id', todo_schedules.todo_id,
+                  'todo_schedule_id', todo_schedules.id
+              )) AS schedules
        FROM todos 
        LEFT JOIN blogs ON blogs.todo_id = todos.id
        LEFT JOIN todo_schedules ON todo_schedules.todo_id = todos.id
        ${where} 
+       GROUP BY todos.id 
        ORDER BY todos.created_at DESC`,
-      [...whereParam], // Your existing where parameters
+      [...whereParam],
     );
 
-    const todos = result.rows;
+    const todos = result.rows.map((todo) => ({
+      ...todo,
+      blogs: todo.blogs || [], // Ensure blogs is an array
+      schedules: todo.schedules || [], // Ensure schedules is an array
+    }));
 
-    // Create a map to group todos and their schedules
-    const todosWithBlogsAndSchedules = {};
-
-    todos.forEach((todo) => {
-      // If the todo does not exist in the accumulator, initialize it
-      if (!todosWithBlogsAndSchedules[todo.id]) {
-        todosWithBlogsAndSchedules[todo.id] = {
-          ...todo,
-          blog: todo.blog_id
-            ? {
-                id: todo.blog_id,
-                text: todo.blog_text,
-                todo_id: todo.blog_todo_id,
-              }
-            : null,
-          schedules: [], // Initialize an empty array for schedules
-        };
-      }
-
-      // Add the schedule to the todo's schedule array if it exists
-      if (todo.scheduled_date) {
-        todosWithBlogsAndSchedules[todo.id].schedules.push({
-          scheduled_date: todo.scheduled_date,
-          todo_id: todo.todo_id,
-          todo_schedule_id: todo.todo_schedule_id,
-          schedule_created_at: todo.schedule_created_at,
-        });
-      }
-    });
-
-    // Convert the object back to an array if needed
-    const finalResult: TodoDto[] = Object.values(todosWithBlogsAndSchedules);
-
-    console.log('todosWithBlogsAndSchedules: ', finalResult);
-    return finalResult;
+    console.log('todos: ', todos);
+    return todos;
   }
 
   async getAllTodosGroupedByDate(userId, from, to): Promise<TodoDto[]> {
