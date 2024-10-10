@@ -130,8 +130,8 @@ export class TodoService {
 
     const todos = result.rows.map((todo) => ({
       ...todo,
-      blogs: todo.blogs || [], // Ensure blogs is an array
-      schedules: todo.schedules || [], // Ensure schedules is an array
+      blogs: todo.blogs || null,
+      schedules: todo.schedules || [],
     }));
 
     console.log('todos: ', todos);
