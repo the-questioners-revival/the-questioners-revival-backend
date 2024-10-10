@@ -119,7 +119,7 @@ export class TodoService {
        LEFT JOIN blogs ON blogs.todo_id = todos.id
        LEFT JOIN todo_schedules ON todo_schedules.todo_id = todos.id
        ${where} 
-       ORDER BY todos.created_at DESC, todo_schedules.created_at ASC`,
+       ORDER BY todos.created_at DESC`,
       [...whereParam], // Your existing where parameters
     );
 
