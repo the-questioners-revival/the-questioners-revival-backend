@@ -218,6 +218,8 @@ export const migrations = [
       todo_id INTEGER NOT NULL,
       scheduled_date DATE NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      deleted_at TIMESTAMP,
       FOREIGN KEY (todo_id) REFERENCES todos(id)
     );
   `,
