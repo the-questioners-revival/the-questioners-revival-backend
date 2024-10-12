@@ -18,4 +18,14 @@ export class ActivityCalendarController {
     );
     return todoList;
   }
+
+  @Get('monthly')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getMonthlyActivityCounts(@Request() req) {
+    const todoList = await this.activityCalendarService.getMonthlyActivityCounts(
+      req.user.id,
+    );
+    return todoList;
+  }
 }
