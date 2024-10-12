@@ -76,6 +76,20 @@ export class TodoController {
     return todoList;
   }
 
+  @Get('activity/daily')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getDailyActivityCounts(
+    @Request() req,
+  ) {
+    const todoList = await this.todoService.getDailyActivityCounts(
+      req.user.id,
+    );
+    return todoList;
+  }
+
+  
+
   @Get('9gag2')
   // @UseGuards(JwtAuthGuard)
   // @ApiBearerAuth()
