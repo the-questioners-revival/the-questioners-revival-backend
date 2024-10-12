@@ -23,6 +23,7 @@ import { CookieUserMiddleware } from './auth/cookie.middleware';
 import { CorsMiddleware } from './auth/cors.middleware';
 import { DatabaseModule } from './database/database.module';
 import { TodoScheduleModule } from './todo-schedules/todo-schedule.module';
+import { ActivityCalendarModule } from './activity-calendar/activity-calendar.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { TodoScheduleModule } from './todo-schedules/todo-schedule.module';
     JwtModule,
     DatabaseModule,
     TodoScheduleModule,
+    ActivityCalendarModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],

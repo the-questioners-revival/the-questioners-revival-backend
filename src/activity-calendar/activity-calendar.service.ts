@@ -1,0 +1,74 @@
+import { Injectable } from '@nestjs/common';
+import { DatabaseService } from 'src/database/database.service';
+import { format } from 'date-fns';
+
+@Injectable()
+export class ActivityCalendarService {
+    constructor(private readonly databaseService: DatabaseService) {}
+    private database;
+  
+    async onModuleInit() {
+      this.database = await this.databaseService.getDatabase();
+    }
+
+  async getDailyActivityCounts(userId: number): Promise<any> {
+    const query = `
+      SELECT DATE(completed_at) AS day, 'todos' AS type, COUNT(*) AS count
+      FROM todos
+      WHERE completed_at IS NOT NULL
+      GROUP BY day
+
+      UNION ALL
+
+      SELECT DATE(given_at) AS day, 'blogs' AS type, COUNT(*) AS count
+      FROM blogs
+      WHERE given_at IS NOT NULL
+      GROUP BY day
+
+      UNION ALL
+
+      SELECT DATE(completed_at) AS day, 'goals' AS type, COUNT(*) AS count
+      FROM goals
+      WHERE completed_at IS NOT NULL
+      GROUP BY day
+
+      UNION ALL
+
+      SELECT DATE(created_at) AS day, 'habits' AS type, COUNT(*) AS count
+      FROM habits_trackers
+      WHERE created_at IS NOT NULL
+      GROUP BY day
+
+      UNION ALL
+
+      SELECT DATE(created_at) AS day, 'qaa' AS type, COUNT(*) AS count
+      FROM qaas
+      WHERE created_at IS NOT NULL
+      GROUP BY day;
+    `;
+  
+   
+    const res = await this.database.query(query);
+
+    // Initialize an empty object to hold the grouped data
+    const groupedData = {};
+  
+    // Transform the data into the desired format
+    res.rows.forEach((row) => {
+      const { day, type, count } = row;
+      const formattedDate = format(new Date(day), 'yyyy-MM-dd');
+  
+      // If the date doesn't exist in the groupedData, create an empty object for it
+      if (!groupedData[formattedDate]) {
+        groupedData[formattedDate] = {};
+        groupedData[formattedDate].total = 0
+      }
+  
+      // Assign the count to the specific type (e.g., todos, blogs) for that date
+      groupedData[formattedDate][type] = parseInt(count, 10); // Convert count to a number
+      groupedData[formattedDate].total +=parseInt(count, 10);
+    });
+  
+    return groupedData;
+  }
+}
