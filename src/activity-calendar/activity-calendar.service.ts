@@ -41,7 +41,7 @@ export class ActivityCalendarService {
 
       UNION ALL
 
-      SELECT DATE(created_at) AS day, 'qaa' AS type, COUNT(*) AS count
+      SELECT DATE(created_at) AS day, 'qaas' AS type, COUNT(*) AS count
       FROM qaas
       WHERE created_at IS NOT NULL
       GROUP BY day;
