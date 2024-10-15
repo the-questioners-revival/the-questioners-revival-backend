@@ -123,11 +123,20 @@ export class TodoService {
                     'todo_id', blogs.todo_id
                 )) FILTER (WHERE blogs.id IS NOT NULL) 
             END AS blogs,
-            jsonb_agg(DISTINCT jsonb_build_object(
-                'scheduled_date', todo_schedules.scheduled_date, 
-                'todo_id', todo_schedules.todo_id,
-                'todo_schedule_id', todo_schedules.id
-            )) AS schedules
+          CASE
+            WHEN jsonb_array_length(
+              jsonb_agg(DISTINCT jsonb_build_object(
+                  'scheduled_date', todo_schedules.scheduled_date, 
+                  'todo_id', todo_schedules.todo_id,
+                  'todo_schedule_id', todo_schedules.id
+            )) FILTER (WHERE todo_schedules.id IS NOT NULL)) = 0 
+            THEN NULL 
+            ELSE jsonb_agg(DISTINCT jsonb_build_object(
+                  'scheduled_date', todo_schedules.scheduled_date, 
+                  'todo_id', todo_schedules.todo_id,
+                  'todo_schedule_id', todo_schedules.id
+            )) FILTER (WHERE todo_schedules.id IS NOT NULL)
+            END AS schedules
       FROM todos 
       LEFT JOIN blogs ON blogs.todo_id = todos.id
       LEFT JOIN todo_schedules ON todo_schedules.todo_id = todos.id
