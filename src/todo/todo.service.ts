@@ -68,6 +68,8 @@ export class TodoService {
     type?: string,
     status?: string,
     priority?: string,
+    limit: number = 10, 
+    offset: number = 0
   ): Promise<TodoDto[]> {
     let whereCount = 1;
     const whereParam = [];
@@ -142,8 +144,9 @@ export class TodoService {
       LEFT JOIN todo_schedules ON todo_schedules.todo_id = todos.id
       ${where} 
       GROUP BY todos.id 
-      ORDER BY todos.created_at DESC`,
-      [...whereParam],
+      ORDER BY todos.created_at DESC
+      LIMIT $${whereCount} OFFSET $${whereCount + 1}`,
+      [...whereParam, limit, offset],
     );
 
     const todos = result.rows.map((todo) => ({

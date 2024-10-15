@@ -43,6 +43,8 @@ export class TodoController {
   @ApiQuery({ name: 'status', required: false })
   @ApiQuery({ name: 'type', required: false })
   @ApiQuery({ name: 'priority', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async getLatestTodos(
@@ -50,12 +52,16 @@ export class TodoController {
     @Query('type') type?: string,
     @Query('status') status?: string,
     @Query('priority') priority?: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
   ) {
     const todoList = await this.todoService.getLatestTodos(
       req.user.id,
       type,
       status,
       priority,
+      limit,
+      offset,
     );
     return todoList;
   }
