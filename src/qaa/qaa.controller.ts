@@ -41,17 +41,23 @@ export class QaaController {
   @Get('latest')
   @ApiQuery({ name: 'type', required: false })
   @ApiQuery({ name: 'showRemoved', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async getLatestQaas(
     @Request() req,
     @Query('type') type?: string,
     @Query('showRemoved') showRemoved?: string,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
   ) {
     const qaaList = await this.qaaService.getLatestQaas(
       req.user.id,
       type,
       showRemoved,
+      limit,
+      offset,
     );
     return qaaList;
   }

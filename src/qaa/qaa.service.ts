@@ -46,6 +46,8 @@ export class QaaService {
     userId: number,
     type?: string,
     showRemoved?: string,
+    limit: number = 10, 
+    offset: number = 0
   ): Promise<QaaDto[]> {
     let whereCount = 1;
     const whereParam = [];
@@ -80,8 +82,8 @@ export class QaaService {
       `SELECT * FROM qaas 
         ${where}
         ORDER by qaas.created_at DESC
-      `,
-      [...whereParam],
+      LIMIT $${whereCount} OFFSET $${whereCount + 1}`,
+      [...whereParam, limit, offset],
     );
 
     return result.rows;
