@@ -68,8 +68,8 @@ export class TodoService {
     type?: string,
     status?: string,
     priority?: string,
-    limit: number = 10, 
-    offset: number = 0
+    limit?: number,
+    offset?: number,
   ): Promise<TodoDto[]> {
     let whereCount = 1;
     const whereParam = [];
@@ -109,6 +109,14 @@ export class TodoService {
       whereCount++;
     }
 
+    const limitOffsetClause = limit
+      ? `LIMIT $${whereCount} OFFSET $${whereCount + 1}`
+      : '';
+
+    if (limit) {
+      whereParam.push(limit, offset || 0);
+    }
+
     const result = await this.database.query(
       `SELECT todos.*, 
             CASE 
@@ -145,8 +153,8 @@ export class TodoService {
       ${where} 
       GROUP BY todos.id 
       ORDER BY todos.created_at DESC
-      LIMIT $${whereCount} OFFSET $${whereCount + 1}`,
-      [...whereParam, limit, offset],
+      ${limitOffsetClause}`,
+      whereParam,
     );
 
     const todos = result.rows.map((todo) => ({
@@ -325,5 +333,4 @@ export class TodoService {
       );
     }
   }
-
 }
