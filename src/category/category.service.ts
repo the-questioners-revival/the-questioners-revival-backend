@@ -223,42 +223,43 @@ export class CategoryService {
     const categoryMap: { [key: number]: CategoryDtoResponse } = {};
     const categoryTree: CategoryDtoResponse[] = [];
 
-    // Map categories by their ID
+    // Step 1: Map categories by their ID
     categories.forEach((category) => {
       categoryMap[category.id] = category;
       category.children = [];
     });
 
-    // Build category tree
+    // Step 2: Build the category tree
     categories.forEach((category) => {
       if (category.category_id === null) {
         // Root category
         categoryTree.push(category);
-    } else {
+      } else {
         // Child category, add to its parent's children array
-        console.log('what category: ', category);
         const parentCategory = categoryMap[category.category_id];
         if (parentCategory) {
-            parentCategory.children.push(category);
+          parentCategory.children.push(category);
         }
-    }
-});
+      }
+    });
 
-    // Fetch content for each category (todos, qaas, blogs)
-    for (let category of categoryTree) {
+    // Step 3: Recursively fetch content for all categories
+    const fetchContentRecursively = async (category: CategoryDtoResponse) => {
+      // Fetch and assign content for the current category
       const content = await this.getCategoryContent(category.id);
       category.todos = content.todos;
       category.qaas = content.qaas;
       category.blogs = content.blogs;
 
-      // Recursively fetch content for child categories
-      for (let child of category.children) {
-        const childContent = await this.getCategoryContent(child.id);
-        console.log('childContent: ', childContent);
-        child.todos = childContent.todos;
-        child.qaas = childContent.qaas;
-        child.blogs = childContent.blogs;
+      // Recursively fetch content for all children
+      for (const child of category.children) {
+        await fetchContentRecursively(child);
       }
+    };
+
+    // Step 4: Fetch content for all root categories and their descendants
+    for (const category of categoryTree) {
+      await fetchContentRecursively(category);
     }
 
     return categoryTree;
@@ -268,16 +269,16 @@ export class CategoryService {
   public async getCategoryTree(userId: number): Promise<CategoryDtoResponse[]> {
     // Fetch all categories for the user
     const result = await this.database.query(
-        'SELECT * FROM categories WHERE user_id = $1 ORDER BY categories.created_at ASC',
-        [userId],
+      'SELECT * FROM categories WHERE user_id = $1 ORDER BY categories.created_at ASC',
+      [userId],
     );
-    
+
     const categories: CategoryDtoResponse[] = result.rows;
     console.log('categories: ', categories);
 
     // Build the category tree with related content
     const res = await this.buildCategoryTree(categories);
     console.log('res: ', JSON.stringify(res));
-    return res
+    return res;
   }
 }
