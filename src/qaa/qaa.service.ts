@@ -122,8 +122,8 @@ export class QaaService {
   async insertQaa(userId: number, qaa: QaaDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO qaas(question, answer, type, link, user_id) VALUES($1, $2, $3, $4, $5) RETURNING *',
-        [qaa.question, qaa.answer, qaa.type, qaa.link, userId],
+        'INSERT INTO qaas(question, answer, type, link, category_id, user_id) VALUES($1, $2, $3, $4, $5, $6) RETURNING *',
+        [qaa.question, qaa.answer, qaa.type, qaa.link, qaa.category_id, userId],
       );
 
       console.log('Qaa inserted successfully:', result.rows[0]);
@@ -144,12 +144,13 @@ export class QaaService {
         throw new HttpException('Qaa not found', HttpStatus.NOT_FOUND);
       }
       const result = await this.database.query(
-        'UPDATE qaas SET question = $1, answer = $2, type = $3, link = $4, deleted_at = $5, updated_at = $6  WHERE id = $7 RETURNING *',
+        'UPDATE qaas SET question = $1, answer = $2, type = $3, link = $4, category_id = $5, deleted_at = $6, updated_at = $7  WHERE id = $8 RETURNING *',
         [
           updatedQaa.question ? updatedQaa.question : foundQaa.question,
           updatedQaa.answer ? updatedQaa.answer : foundQaa.answer,
           updatedQaa.type ? updatedQaa.type : foundQaa.type,
           updatedQaa.link ? updatedQaa.link : foundQaa.link,
+          updatedQaa.category_id ? updatedQaa.category_id : foundQaa.category_id,
           updatedQaa.deleted_at,
           new Date().toISOString(),
           id,

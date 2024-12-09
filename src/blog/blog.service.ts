@@ -66,7 +66,7 @@ export class BlogService {
     const result = await this.database.query(
       `
         SELECT DATE(given_at) AS date,
-        JSON_AGG(json_build_object('id', id, 'text', text, 'given_at', given_at, 
+        JSON_AGG(json_build_object('id', id, 'text', text, 'category_id', category_id, 'given_at', given_at, 
         'created_at', created_at, 'updated_at', updated_at, 
         'deleted_at', deleted_at, 'todo_id', todo_id) ORDER BY given_at DESC) AS blogs
         FROM blogs
@@ -83,8 +83,8 @@ export class BlogService {
   async insertBlog(userId: number, blog: BlogDto) {
     try {
       const result = await this.database.query(
-        'INSERT INTO blogs(text, given_at, user_id, todo_id) VALUES($1, $2, $3, $4) RETURNING *',
-        [blog.text, blog.given_at, userId, blog.todo_id],
+        'INSERT INTO blogs(text, category_id, given_at, user_id, todo_id) VALUES($1, $2, $3, $4, $5) RETURNING *',
+        [blog.text, blog.category_id, blog.given_at, userId, blog.todo_id],
       );
 
       console.log('Blog inserted successfully:', result.rows[0]);
@@ -106,9 +106,12 @@ export class BlogService {
       }
 
       const result = await this.database.query(
-        'UPDATE blogs SET text = $1, given_at = $2, deleted_at = $3, updated_at = $4, todo_id = $5 WHERE id = $6 AND user_id = $7 RETURNING *',
+        'UPDATE blogs SET text = $1, category_id = $2, given_at = $3, deleted_at = $4, updated_at = $5, todo_id = $6 WHERE id = $7 AND user_id = $8 RETURNING *',
         [
           updatedBlog.text ? updatedBlog.text : foundBlog.text,
+          updatedBlog.category_id
+            ? updatedBlog.category_id
+            : foundBlog.category_id,
           updatedBlog.given_at ? updatedBlog.given_at : foundBlog.given_at,
           updatedBlog.deleted_at
             ? updatedBlog.deleted_at

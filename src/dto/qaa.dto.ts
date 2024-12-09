@@ -17,6 +17,9 @@ export class QaaDto {
   type: string;
 
   @ApiProperty()
+  category_id: number;
+
+  @ApiProperty()
   created_at: Date;
 
   @ApiProperty()

@@ -17,6 +17,9 @@ export class TodoDto {
   status: string;
 
   @ApiProperty()
+  category_id: number;
+
+  @ApiProperty()
   created_at: Date;
 
   @ApiProperty()

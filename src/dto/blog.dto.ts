@@ -6,6 +6,9 @@ export class BlogDto {
 
   @ApiProperty()
   text: string;
+  
+  @ApiProperty()
+  category_id: number;
 
   @ApiProperty()
   given_at: Date;

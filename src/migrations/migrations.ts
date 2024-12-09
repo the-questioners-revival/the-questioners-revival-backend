@@ -239,5 +239,39 @@ export const migrations = [
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
     `
+  },
+  {
+    key: '20241209120000-AddCategoryIdToTodosQaasBlogs',
+    script: `
+      -- Add category_id to todos table
+      ALTER TABLE todos 
+      ADD COLUMN category_id INTEGER;
+  
+      -- Add foreign key constraint to todos
+      ALTER TABLE todos 
+      ADD CONSTRAINT fk_category_todos
+      FOREIGN KEY (category_id) REFERENCES categories(id)
+      ON DELETE SET NULL;
+  
+      -- Add category_id to qaas table
+      ALTER TABLE qaas 
+      ADD COLUMN category_id INTEGER;
+  
+      -- Add foreign key constraint to qaas
+      ALTER TABLE qaas 
+      ADD CONSTRAINT fk_category_qaas
+      FOREIGN KEY (category_id) REFERENCES categories(id)
+      ON DELETE SET NULL;
+  
+      -- Add category_id to blogs table
+      ALTER TABLE blogs 
+      ADD COLUMN category_id INTEGER;
+  
+      -- Add foreign key constraint to blogs
+      ALTER TABLE blogs 
+      ADD CONSTRAINT fk_category_blogs
+      FOREIGN KEY (category_id) REFERENCES categories(id)
+      ON DELETE SET NULL;
+    `,
   }
 ];
