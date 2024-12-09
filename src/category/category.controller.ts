@@ -26,7 +26,7 @@ import { CategoryDto } from 'src/dto/category.dto';
     @Get()
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    async getAllCategorys(@Req() req) {
+    async getAllCategories(@Req() req) {
       const categorys = await this.categoryService.getAllCategories(req.user.id);
       return categorys;
     }
@@ -34,15 +34,23 @@ import { CategoryDto } from 'src/dto/category.dto';
     @Get('latest')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    async getLatestCategory(@Req() req) {
+    async getLatestCategories(@Req() req) {
       const categoryList = await this.categoryService.getLatestCategory(req.user.id);
+      return categoryList;
+    }
+
+    @Get('tree')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    async getCategoryTree(@Req() req) {
+      const categoryList = await this.categoryService.getCategoryTree(req.user.id);
       return categoryList;
     }
   
     @Get('fromTo')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    async getCategorysFromTo(
+    async getCategoriesFromTo(
       @Req() req,
       @Query('type') type: string,
       @Query('from') from: string,
@@ -60,7 +68,7 @@ import { CategoryDto } from 'src/dto/category.dto';
     @Get('groupedByDate')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
-    async getCategorysGroupedByDate(
+    async getCategoriesGroupedByDate(
       @Req() req,
       @Query('from') from: string,
       @Query('to') to: string,
