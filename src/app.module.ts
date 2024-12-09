@@ -24,6 +24,7 @@ import { CorsMiddleware } from './auth/cors.middleware';
 import { DatabaseModule } from './database/database.module';
 import { TodoScheduleModule } from './todo-schedules/todo-schedule.module';
 import { ActivityCalendarModule } from './activity-calendar/activity-calendar.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ActivityCalendarModule } from './activity-calendar/activity-calendar.mo
     DatabaseModule,
     TodoScheduleModule,
     ActivityCalendarModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],
