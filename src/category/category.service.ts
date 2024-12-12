@@ -197,15 +197,21 @@ export class CategoryService {
   // Function to get all related todos, qaas, and blogs for a category
   private async getCategoryContent(category_id: number) {
     const todos = await this.database.query(
-      'SELECT * FROM todos WHERE category_id = $1',
+      `SELECT *, 
+        'todos' AS table_name
+       FROM todos WHERE category_id = $1`,
       [category_id],
     );
     const qaas = await this.database.query(
-      'SELECT * FROM qaas WHERE category_id = $1',
+      `SELECT *, 
+        'qaas' AS table_name
+       FROM qaas WHERE category_id = $1`,
       [category_id],
     );
     const blogs = await this.database.query(
-      'SELECT * FROM blogs WHERE category_id = $1',
+      `SELECT * ,
+        'blogs' AS table_name
+        FROM blogs WHERE category_id = $1`,
       [category_id],
     );
 
