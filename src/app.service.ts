@@ -43,73 +43,50 @@ export class AppService {
   }
 
   async search(searchString: string, userId: number) {
-    console.log('searchString: ', searchString);
-    const result = await this.database.query(
-      `
-      SELECT 
-      'todos' AS table_name,
-      id,
-      title AS text,
-      NULL AS answer,
-      NULL AS link,
-      created_at,
-      'title' AS column_name
-      FROM todos 
-      WHERE title ILIKE $1
-      AND todos.user_id = $2
-      UNION ALL 
-      SELECT 
-          'qaas' AS table_name,
-          id, 
-          question AS text,
-          answer,
-          link,
-          created_at,
-          'question' AS column_name
-      FROM qaas 
-      WHERE (question ILIKE $1 OR answer ILIKE $1 OR link ILIKE $1)
-      AND qaas.user_id = $2
-      UNION ALL 
-      SELECT 
-          'blogs' AS table_name,
-          id, 
-          text,
-          NULL AS answer,
-          NULL AS link,
-          given_at as created_at,
-          'text' AS column_name
-      FROM blogs 
-      WHERE text ILIKE $1
-      AND blogs.user_id = $2
-      UNION ALL 
-      SELECT 
-          'goals' AS table_name,
-          id, 
-          title AS text,
-          NULL AS answer,
-          NULL AS link,
-          given_at as created_at,
-          'title' AS column_name
-      FROM goals 
-      WHERE title ILIKE $1
-      AND goals.user_id = $2
-      UNION ALL 
-      SELECT 
-          'reviews' AS table_name,
-          id, 
-          text,
-          NULL AS answer,
-          NULL AS link,
-          given_at as created_at,
-          'text' AS column_name
-      FROM reviews 
-      WHERE text ILIKE $1
-      AND reviews.user_id = $2
-      ORDER by created_at DESC
-  `,
-      [`%${searchString}%`, userId],
+    const searchTerm = `%${searchString}%`;
+  
+    const todosQuery = this.database.query(
+      `SELECT 'todos' AS table_name, * FROM todos WHERE user_id = $1 AND (title ILIKE $2) AND deleted_at IS NULL`, 
+      [userId, searchTerm]
     );
-
-    return result.rows;
+  
+    const qaasQuery = this.database.query(
+      `SELECT 'qaas' AS table_name, * FROM qaas WHERE user_id = $1 AND (question ILIKE $2 OR answer ILIKE $2 OR link ILIKE $2) AND deleted_at IS NULL`, 
+      [userId, searchTerm]
+    );
+  
+    const blogsQuery = this.database.query(
+      `SELECT 'blogs' AS table_name, * FROM blogs WHERE user_id = $1 AND (text ILIKE $2) AND deleted_at IS NULL`, 
+      [userId, searchTerm]
+    );
+  
+    const goalsQuery = this.database.query(
+      `SELECT 'goals' AS table_name, * FROM goals WHERE user_id = $1 AND (title ILIKE $2) AND deleted_at IS NULL`, 
+      [userId, searchTerm]
+    );
+  
+    const reviewsQuery = this.database.query(
+      `SELECT 'reviews' AS table_name, * FROM reviews WHERE user_id = $1 AND (text ILIKE $2) AND deleted_at IS NULL`, 
+      [userId, searchTerm]
+    );
+  
+    // Run all queries in parallel
+    const results = await Promise.all([todosQuery, qaasQuery, blogsQuery, goalsQuery, reviewsQuery]);
+  
+    // Combine results into one array
+    const combinedResults = [
+      ...results[0].rows, 
+      ...results[1].rows, 
+      ...results[2].rows, 
+      ...results[3].rows, 
+      ...results[4].rows
+    ];
+  
+    // Optional: sort results by created_at if present
+    combinedResults.sort((a, b) => 
+      new Date(b.created_at || b.given_at).getTime() - new Date(a.created_at || a.given_at).getTime()
+    );
+    return combinedResults;
   }
+  
 }
