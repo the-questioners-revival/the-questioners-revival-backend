@@ -238,7 +238,7 @@ export const migrations = [
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
-    `
+    `,
   },
   {
     key: '20241209120000-AddCategoryIdToTodosQaasBlogs',
@@ -273,5 +273,15 @@ export const migrations = [
       FOREIGN KEY (category_id) REFERENCES categories(id)
       ON DELETE SET NULL;
     `,
-  }
+  },
+  {
+    key: '20241213180000-CreateImagesTable',
+    script: `
+      CREATE TABLE images (
+        id SERIAL PRIMARY KEY,
+        file_path VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `,
+  },
 ];

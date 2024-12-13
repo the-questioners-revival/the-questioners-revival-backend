@@ -25,9 +25,16 @@ import { DatabaseModule } from './database/database.module';
 import { TodoScheduleModule } from './todo-schedules/todo-schedule.module';
 import { ActivityCalendarModule } from './activity-calendar/activity-calendar.module';
 import { CategoryModule } from './category/category.module';
+import { ImagesModule } from './images/images.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'), // Serve files from the 'uploads' directory
+      serveRoot: '/uploads', // The URL path where the files will be accessible
+    }),
     MigrationsModule,
     UsersModule,
     TodoModule,
@@ -46,6 +53,7 @@ import { CategoryModule } from './category/category.module';
     TodoScheduleModule,
     ActivityCalendarModule,
     CategoryModule,
+    ImagesModule,
   ],
   controllers: [AppController],
   providers: [AppService, AuthService],
@@ -63,6 +71,7 @@ export class AppModule implements NestModule {
         { path: 'auth/login', method: RequestMethod.ALL }, // Exclude authentication routes
         { path: 'auth/register', method: RequestMethod.ALL }, // Exclude authentication routes
         { path: '', method: RequestMethod.ALL }, // Exclude authentication routes
+        { path: 'uploads/(.*)', method: RequestMethod.ALL }
       )
       .forRoutes('*');
   }
