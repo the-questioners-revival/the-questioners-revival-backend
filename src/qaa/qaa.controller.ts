@@ -78,7 +78,7 @@ export class QaaController {
     return qaaList;
   }
 
-  @Get('getById/:id')
+  @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async getQaaById(@Request() req, @Param('id') id: number) {
