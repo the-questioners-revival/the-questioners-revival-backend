@@ -55,7 +55,7 @@ export class BlogController {
     return blogList;
   }
 
-  @Get('getById/:id')
+  @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async getBlogById(@Request() req, @Param('id') id: number) {
