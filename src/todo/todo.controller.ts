@@ -191,7 +191,7 @@ export class TodoController {
     getAllComments(apiUrl, apiFirstUrl);
   }
 
-  @Get('getById/:id')
+  @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async getTodoById(@Request() req, @Param('id') id: number) {
