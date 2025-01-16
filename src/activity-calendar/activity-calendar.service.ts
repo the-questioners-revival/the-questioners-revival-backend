@@ -16,6 +16,7 @@ export class ActivityCalendarService {
       SELECT DATE(completed_at) AS day, 'todos' AS type, COUNT(*) AS count
       FROM todos
       WHERE completed_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY day
 
       UNION ALL
@@ -23,6 +24,7 @@ export class ActivityCalendarService {
       SELECT DATE(given_at) AS day, 'blogs' AS type, COUNT(*) AS count
       FROM blogs
       WHERE given_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY day
 
       UNION ALL
@@ -30,6 +32,7 @@ export class ActivityCalendarService {
       SELECT DATE(completed_at) AS day, 'goals' AS type, COUNT(*) AS count
       FROM goals
       WHERE completed_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY day
 
       UNION ALL
@@ -37,6 +40,7 @@ export class ActivityCalendarService {
       SELECT DATE(created_at) AS day, 'habits' AS type, COUNT(*) AS count
       FROM habits_trackers
       WHERE created_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY day
 
       UNION ALL
@@ -44,6 +48,7 @@ export class ActivityCalendarService {
       SELECT DATE(created_at) AS day, 'qaas' AS type, COUNT(*) AS count
       FROM qaas
       WHERE created_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY day;
     `;
 
@@ -76,6 +81,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(completed_at, 'YYYY-MM') AS month, 'todos' AS type, COUNT(*) AS count
       FROM todos
       WHERE completed_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY month
   
       UNION ALL
@@ -83,6 +89,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(given_at, 'YYYY-MM') AS month, 'blogs' AS type, COUNT(*) AS count
       FROM blogs
       WHERE given_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY month
   
       UNION ALL
@@ -90,6 +97,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(completed_at, 'YYYY-MM') AS month, 'goals' AS type, COUNT(*) AS count
       FROM goals
       WHERE completed_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY month
   
       UNION ALL
@@ -97,6 +105,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(created_at, 'YYYY-MM') AS month, 'habits' AS type, COUNT(*) AS count
       FROM habits_trackers
       WHERE created_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY month
   
       UNION ALL
@@ -104,6 +113,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(created_at, 'YYYY-MM') AS month, 'qaas' AS type, COUNT(*) AS count
       FROM qaas
       WHERE created_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY month;
     `;
 
@@ -135,6 +145,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(completed_at, 'YYYY') AS year, 'todos' AS type, COUNT(*) AS count
       FROM todos
       WHERE completed_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY year
   
       UNION ALL
@@ -142,6 +153,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(given_at, 'YYYY') AS year, 'blogs' AS type, COUNT(*) AS count
       FROM blogs
       WHERE given_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY year
   
       UNION ALL
@@ -149,6 +161,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(completed_at, 'YYYY') AS year, 'goals' AS type, COUNT(*) AS count
       FROM goals
       WHERE completed_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY year
   
       UNION ALL
@@ -156,6 +169,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(created_at, 'YYYY') AS year, 'habits' AS type, COUNT(*) AS count
       FROM habits_trackers
       WHERE created_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY year
   
       UNION ALL
@@ -163,6 +177,7 @@ export class ActivityCalendarService {
       SELECT TO_CHAR(created_at, 'YYYY') AS year, 'qaas' AS type, COUNT(*) AS count
       FROM qaas
       WHERE created_at IS NOT NULL
+      AND user_id = ${userId}
       GROUP BY year;
     `;
 
