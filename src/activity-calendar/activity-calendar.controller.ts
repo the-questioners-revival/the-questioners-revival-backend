@@ -19,6 +19,17 @@ export class ActivityCalendarController {
     return todoList;
   }
 
+
+  @Get('weekly')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getWeeklyActivityCounts(@Request() req) {
+    const todoList = await this.activityCalendarService.getWeeklyActivityCounts(
+      req.user.id,
+    );
+    return todoList;
+  }
+
   @Get('monthly')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

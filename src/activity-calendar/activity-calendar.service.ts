@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 
 @Injectable()
 export class ActivityCalendarService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) { }
   private database;
 
   async onModuleInit() {
@@ -71,6 +71,70 @@ export class ActivityCalendarService {
       // Assign the count to the specific type (e.g., todos, blogs) for that date
       groupedData[formattedDate][type] = parseInt(count, 10); // Convert count to a number
       groupedData[formattedDate].total += parseInt(count, 10);
+    });
+
+    return groupedData;
+  }
+
+  async getWeeklyActivityCounts(userId: number): Promise<any> {
+    const query = `
+    SELECT TO_CHAR(completed_at, 'IYYY-IW') AS week, 'todos' AS type, COUNT(*) AS count
+    FROM todos
+    WHERE completed_at IS NOT NULL
+    AND user_id = ${userId}
+    GROUP BY week
+
+    UNION ALL
+
+    SELECT TO_CHAR(given_at, 'IYYY-IW') AS week, 'blogs' AS type, COUNT(*) AS count
+    FROM blogs
+    WHERE given_at IS NOT NULL
+    AND user_id = ${userId}
+    GROUP BY week
+
+    UNION ALL
+
+    SELECT TO_CHAR(completed_at, 'IYYY-IW') AS week, 'goals' AS type, COUNT(*) AS count
+    FROM goals
+    WHERE completed_at IS NOT NULL
+    AND user_id = ${userId}
+    GROUP BY week
+
+    UNION ALL
+
+    SELECT TO_CHAR(created_at, 'IYYY-IW') AS week, 'habits' AS type, COUNT(*) AS count
+    FROM habits_trackers
+    WHERE created_at IS NOT NULL
+    AND user_id = ${userId}
+    GROUP BY week
+
+    UNION ALL
+
+    SELECT TO_CHAR(created_at, 'IYYY-IW') AS week, 'qaas' AS type, COUNT(*) AS count
+    FROM qaas
+    WHERE created_at IS NOT NULL
+    AND user_id = ${userId}
+    GROUP BY week;
+  `;
+
+    const res = await this.database.query(query);
+
+    // Initialize an empty object to hold the grouped data
+    const groupedData: { [key: string]: any } = {};
+
+    // Transform the data into the desired format
+    res.rows.forEach((row) => {
+      const { week, type, count } = row;
+
+      // If the week doesn't exist in the groupedData, create an empty object for it
+      if (!groupedData[week]) {
+        groupedData[week] = {};
+        groupedData[week].total = 0;
+      }
+
+      // Assign the count to the specific type (e.g., todos, blogs) for that week
+      groupedData[week][type] = parseInt(count, 10); // Convert count to a number
+      groupedData[week].total += parseInt(count, 10);
     });
 
     return groupedData;
